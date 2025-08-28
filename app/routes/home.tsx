@@ -201,14 +201,12 @@ function getStatusIcon(status: Report["status"]) {
 function getStatusBadge(status: Report["status"]) {
   const baseClasses =
     "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium";
-  switch (status) {
-    case ReportStatus.completed:
-      return `${baseClasses} bg-green-100 text-green-800`;
-    case ReportStatus.inProgress:
-      return `${baseClasses} bg-yellow-100 text-yellow-800`;
-    case ReportStatus.pending:
-      return `${baseClasses} bg-red-100 text-red-800`;
-  }
+  const colorMap = {
+    [ReportStatus.completed]: "bg-green-100 text-green-800",
+    [ReportStatus.inProgress]: "bg-yellow-100 text-yellow-800",
+    [ReportStatus.pending]: "bg-red-100 text-red-800",
+  };
+  return <span className={`${baseClasses} ${colorMap[status]}`}>{status}</span>;
 }
 
 export default function Home() {
@@ -408,9 +406,7 @@ export default function Home() {
                           <span className="text-gray-300">•</span>
                           <div className="flex items-center space-x-1">
                             {getStatusIcon(report.status)}
-                            <span className={getStatusBadge(report.status)}>
-                              {report.status}
-                            </span>
+                            {getStatusBadge(report.status)}
                           </div>
                         </div>
                       </div>
