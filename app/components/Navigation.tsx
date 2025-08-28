@@ -1,4 +1,4 @@
-import { Coins, Home, Menu, MessageCircleWarning, Settings } from "lucide-react";
+import { Coins, Home, LogOut, Menu, MessageCircleWarning, User } from "lucide-react";
 import { NavLink } from "react-router";
 import { Button } from "~/components/ui/button";
 import {
@@ -57,17 +57,28 @@ export function Navigation() {
           </ul>
         </nav>
 
-        {/* User Profile */}
-        <div className="p-4 border-t">
+        {/* User Profile + Logout */}
+        <div className="p-4 border-t space-y-2">
           <div className="flex items-center gap-3 px-4 py-3">
             <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-              <Settings className="h-4 w-4 text-gray-600" />
+              <User className="h-4 w-4 text-gray-600" />
             </div>
             <div className="flex-1 text-left">
               <p className="text-sm font-medium text-gray-900">회사 관리자</p>
               <p className="text-xs text-gray-500">admin@example.com</p>
             </div>
           </div>
+
+          {/* Logout button */}
+          <button
+            onClick={() => {
+              console.log("로그아웃");
+            }}
+            className="w-full flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors"
+          >
+            <LogOut className="h-5 w-5 text-gray-500" />
+            로그아웃
+          </button>
         </div>
       </div>
     </aside>
@@ -114,16 +125,27 @@ export function MobileNavTrigger() {
             </ul>
           </nav>
 
-          <div className="mt-auto border-t p-4">
+          <div className="border-t p-4 space-y-2">
             <div className="flex items-center gap-3 px-4 py-3">
               <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-                <Settings className="h-4 w-4 text-gray-600" />
+                <User className="h-4 w-4 text-gray-600" />
               </div>
               <div className="flex-1">
                 <p className="text-sm font-medium text-gray-900">관리자</p>
                 <p className="text-xs text-gray-500">admin@example.com</p>
               </div>
             </div>
+
+            {/* Logout */}
+            <button
+              onClick={() => {
+                console.log("로그아웃");
+              }}
+              className="w-full flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors"
+            >
+              <LogOut className="h-5 w-5 text-gray-500" />
+              로그아웃
+            </button>
           </div>
         </SheetContent>
       </Sheet>
