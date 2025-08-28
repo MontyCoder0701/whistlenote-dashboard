@@ -1,0 +1,191 @@
+import { Calendar, FileText, MapPin } from "lucide-react";
+import { Bar, BarChart, XAxis, YAxis } from "recharts";
+
+import type { JSX } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "~/components/ui/chart";
+
+interface Report {
+  id: string;
+  siteName: string;
+  siteId: string;
+  location: string;
+  date: Date;
+  status: ReportStatus;
+  type: string;
+  description: string;
+}
+
+enum ReportStatus {
+  completed = "완료",
+  inProgress = "진행중",
+  pending = "대기중",
+}
+
+interface DashboardPageProps {
+  filteredReports: Report[];
+  stats: {
+    completed: number;
+    inProgress: number;
+    pending: number;
+    total: number;
+  };
+  chartData: { month: string; incidents: number }[];
+  getStatusIcon: (status: ReportStatus) => JSX.Element;
+  getStatusBadge: (status: ReportStatus) => JSX.Element;
+}
+
+const chartConfig = {
+  incidents: {
+    label: "사고 건수",
+    color: "var(--primary)",
+  },
+};
+
+export function DashboardPage({
+  filteredReports,
+  stats,
+  chartData,
+  getStatusIcon,
+  getStatusBadge,
+}: DashboardPageProps) {
+  return (
+    <>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+        <div className="lg:col-span-2">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-primary">
+                월별 사고 발생 현황
+              </CardTitle>
+              <CardDescription>최근 6개월간 사고 발생 건수</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ChartContainer config={chartConfig}>
+                <BarChart data={chartData}>
+                  <XAxis
+                    dataKey="month"
+                    tickLine={false}
+                    tickMargin={10}
+                    axisLine={false}
+                  />
+                  <YAxis tickLine={false} axisLine={false} tickMargin={6} />
+                  <ChartTooltip
+                    cursor={false}
+                    content={<ChartTooltipContent hideLabel />}
+                  />
+                  <Bar
+                    dataKey="incidents"
+                    fill="var(--color-incidents)"
+                    radius={4}
+                  />
+                </BarChart>
+              </ChartContainer>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div>
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-primary">이번 달 통계</CardTitle>
+              <CardDescription>8월 현재 현황</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-600">총 제보</span>
+                <span className="text-2xl font-bold text-primary">
+                  {stats.total}건
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-600">
+                  {ReportStatus.completed}
+                </span>
+                <span className="text-lg font-semibold text-green-600">
+                  {stats.completed}건
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-600">
+                  {ReportStatus.inProgress}
+                </span>
+                <span className="text-lg font-semibold text-yellow-600">
+                  {stats.inProgress}건
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-600">
+                  {ReportStatus.pending}
+                </span>
+                <span className="text-lg font-semibold text-red-600">
+                  {stats.pending}건
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      <div className="bg-white shadow overflow-hidden sm:rounded-lg border-t-4 border-primary">
+        <div className="px-4 py-5 sm:p-6">
+          <h2 className="text-lg font-medium text-primary mb-4">최근 제보</h2>
+          <div className="space-y-4">
+            {filteredReports.map((report) => (
+              <div
+                key={report.id}
+                className="border border-gray-200 rounded-lg p-4 hover:shadow-md hover:border-primary/50 transition-all"
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex items-start space-x-3 flex-1">
+                    <div className="flex-shrink-0 mt-1">
+                      <FileText className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-lg font-medium text-gray-900">
+                        {report.siteName}
+                      </h3>
+                      <div className="flex items-center space-x-4 text-sm text-gray-500 mt-1">
+                        <div className="flex items-center space-x-1">
+                          <MapPin className="h-4 w-4" />
+                          <span>{report.location}</span>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <Calendar className="h-4 w-4" />
+                          <span>
+                            {new Date(report.date).toLocaleDateString()}
+                          </span>
+                        </div>
+                      </div>
+                      <p className="text-gray-600 mt-2">{report.description}</p>
+                      <div className="flex items-center space-x-2 mt-3">
+                        <span className="text-sm font-medium text-gray-900">
+                          {report.type}
+                        </span>
+                        <span className="text-gray-300">•</span>
+                        <div className="flex items-center space-x-1">
+                          {getStatusIcon(report.status)}
+                          {getStatusBadge(report.status)}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
