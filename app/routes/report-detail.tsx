@@ -1,11 +1,34 @@
-import { ArrowLeft } from "lucide-react";
-import { useMemo } from "react";
+import { ArrowLeft, Gift, Image as ImageIcon } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useOutletContext, useParams } from "react-router";
 import { Button } from "~/components/ui/button";
 import {
   Card, CardContent, CardDescription, CardHeader, CardTitle,
 } from "~/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+} from "~/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
+import { Input } from "~/components/ui/input";
+import { Textarea } from "~/components/ui/textarea";
+import { ReportStatus } from "~/types";
 import type { LayoutContext } from "../layouts/app-layout";
+
+type Message = {
+  id: string;
+  author: "reporter" | "manager" | "system";
+  name?: string;
+  text?: string;
+  createdAt: Date;
+  mediaUrl?: string;
+  mediaType?: "image" | "video";
+};
 
 export default function ReportDetailPageRoute() {
   const { id } = useParams();
@@ -15,9 +38,103 @@ export default function ReportDetailPageRoute() {
     useOutletContext<LayoutContext>();
 
   const report = useMemo(
-    () => filteredReports.find(r => String(r.id) === String(id)),
+    () => filteredReports.find((r) => String(r.id) === String(id)),
     [filteredReports, id]
   );
+
+  const [authorName] = useState("담당자");
+  const [draft, setDraft] = useState("");
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [status, setStatus] = useState<ReportStatus | undefined>(undefined);
+
+  // 포상 상태
+  const [rewardAmount, setRewardAmount] = useState<number | "">("");
+  const [decidedAmount, setDecidedAmount] = useState<number | null>(null);
+
+  // 미디어 업로드 
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  // 미리보기 상태
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewType, setPreviewType] = useState<"image" | "video" | null>(null);
+
+  useEffect(() => {
+    if (!report) return;
+    setStatus(report.status as ReportStatus);
+    setMessages([
+      {
+        id: "sys-0",
+        author: "system",
+        text: `제보 #${report.id} 채팅이 시작되었습니다.`,
+        createdAt: new Date(),
+      },
+      {
+        id: "rep-0",
+        author: "reporter",
+        name: "제보자",
+        text: report.description || "설명이 없습니다.",
+        createdAt: new Date(report.date),
+      },
+    ]);
+  }, [report]);
+
+  const listRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: "smooth" });
+  }, [messages]);
+
+  const send = () => {
+    const text = draft.trim();
+    if (!text || !report) return;
+    setMessages((prev) => [
+      ...prev,
+      { id: `mgr-${prev.length + 1}`, author: "manager", name: authorName, text, createdAt: new Date() },
+    ]);
+    setDraft("");
+  };
+
+  const sendMedia = (file: File) => {
+    const url = URL.createObjectURL(file);
+    const type = file.type.startsWith("video") ? "video" : "image";
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: `mgr-media-${prev.length + 1}`,
+        author: "manager",
+        name: authorName,
+        mediaUrl: url,
+        mediaType: type,
+        createdAt: new Date(),
+      },
+    ]);
+  };
+
+  const changeStatus = (newStatus: ReportStatus) => {
+    setStatus(newStatus);
+    setMessages((prev) => [
+      ...prev,
+      { id: `sys-status-${prev.length + 1}`, author: "system", text: `상태가 ${newStatus}로 변경되었습니다.`, createdAt: new Date() },
+    ]);
+  };
+
+  const decideReward = () => {
+    const amt = typeof rewardAmount === "number" ? rewardAmount : parseInt(String(rewardAmount || 0), 10);
+    if (!amt || amt <= 0 || Number.isNaN(amt)) return;
+    const firstTime = decidedAmount === null;
+    const prevAmt = decidedAmount;
+    setDecidedAmount(amt);
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: `sys-reward-${prev.length + 1}`,
+        author: "system",
+        text: firstTime
+          ? `포상금 ${amt} 지급이 결정되었습니다.`
+          : `포상금이 ${prevAmt} → ${amt}로 변경되었습니다.`,
+        createdAt: new Date(),
+      },
+    ]);
+  };
 
   if (!report) {
     return (
@@ -35,47 +152,162 @@ export default function ReportDetailPageRoute() {
     );
   }
 
+  const bubbleBase = "max-w-[80%] rounded-2xl px-3 py-2 shadow-sm";
+  const meBubble = `${bubbleBase} bg-primary text-white ml-auto`;
+  const otherBubble = `${bubbleBase} bg-gray-100 text-gray-900`;
+  const sysBubble = "text-xs text-gray-500 text-center my-2";
+
+  const rewardActive = decidedAmount !== null;
+
   return (
-    <Card>
-      <CardHeader className="space-y-2">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-primary">제보 상세</CardTitle>
-          <div className="flex items-center gap-2">
-            {getStatusIcon(report.status)}
-            {getStatusBadge(report.status)}
+    <>
+      <Card className="max-w-5xl mx-auto">
+        <CardHeader className="space-y-2">
+          <div className="flex items-center justify-between gap-3">
+            <CardTitle className="text-primary">제보 상세</CardTitle>
+            <div className="flex items-center gap-3">
+              {status && getStatusIcon(status)}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <div className="cursor-pointer select-none">
+                    {status && getStatusBadge(status)}
+                  </div>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-36">
+                  <DropdownMenuItem onSelect={() => changeStatus(ReportStatus.pending)}>대기</DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => changeStatus(ReportStatus.inProgress)}>진행중</DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => changeStatus(ReportStatus.completed)}>완료</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <div className="flex items-center gap-2">
+                <Gift className={`h-4 w-4 ${rewardActive ? "text-amber-600" : "text-gray-400"}`} />
+                <Input
+                  type="number"
+                  inputMode="numeric"
+                  min={0}
+                  step={1000}
+                  value={rewardAmount}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    setRewardAmount(v === "" ? "" : Number(v));
+                  }}
+                  placeholder="포상금(원)"
+                  className="w-28"
+                />
+                <Button
+                  variant={rewardActive ? "secondary" : "default"}
+                  onClick={decideReward}
+                  disabled={rewardAmount === "" || Number(rewardAmount) <= 0}
+                >
+                  {rewardActive ? "금액 변경" : "지급 결정"}
+                </Button>
+              </div>
+            </div>
           </div>
-        </div>
-        <CardDescription>
-          {report.siteName} · {new Date(report.date).toLocaleDateString()}
-        </CardDescription>
-      </CardHeader>
+          <CardDescription>
+            {report.siteName} · {new Date(report.date).toLocaleDateString()}
+            {rewardActive && <span className="ml-2 text-amber-700">(포상금 {decidedAmount!})</span>}
+          </CardDescription>
+        </CardHeader>
 
-      <CardContent className="space-y-4">
-        <div>
-          <div className="text-xs text-gray-500 mb-1">유형</div>
-          <div className="text-sm text-gray-900">{report.type}</div>
-        </div>
+        <CardContent className="space-y-4">
+          <div className="rounded-xl border bg-white overflow-hidden">
+            <div ref={listRef} className="h-[52vh] overflow-auto px-4 py-3 space-y-3">
+              {messages.map((m) => {
+                if (m.author === "system") {
+                  return <div key={m.id} className={sysBubble}>{m.text} · {m.createdAt.toLocaleString()}</div>;
+                }
+                const mine = m.author === "manager";
+                return (
+                  <div key={m.id} className={`flex items-end gap-2 ${mine ? "justify-end" : "justify-start"}`}>
+                    {!mine && (
+                      <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center text-xs text-gray-600">
+                        {(m.name || "유저").slice(0, 2)}
+                      </div>
+                    )}
+                    <div className={`min-w-0 ${mine ? "ml-auto" : ""}`}>
+                      <div className={`flex ${mine ? "justify-end" : "justify-start"} mb-1`}>
+                        <span className="text-[10px] text-gray-500">
+                          {(m.name || (mine ? authorName : "제보자"))} · {m.createdAt.toLocaleTimeString()}
+                        </span>
+                      </div>
+                      <div className={mine ? meBubble : otherBubble}>
+                        {m.text && <p className="whitespace-pre-wrap break-words text-sm leading-relaxed">{m.text}</p>}
+                        {m.mediaUrl && m.mediaType === "image" && (
+                          <img
+                            src={m.mediaUrl}
+                            alt="첨부 이미지"
+                            className="mt-2 max-h-60 rounded-lg cursor-pointer"
+                            onClick={() => {
+                              setPreviewUrl(m.mediaUrl!);
+                              setPreviewType("image");
+                            }}
+                          />
+                        )}
+                        {m.mediaUrl && m.mediaType === "video" && (
+                          <video
+                            src={m.mediaUrl}
+                            controls
+                            className="mt-2 max-h-60 rounded-lg cursor-pointer"
+                            onClick={() => {
+                              setPreviewUrl(m.mediaUrl!);
+                              setPreviewType("video");
+                            }}
+                          />
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
 
-        <div>
-          <div className="text-xs text-gray-500 mb-1">위치</div>
-          <div className="text-sm text-gray-900 break-words whitespace-normal">
-            {report.location}
+            <div className="border-t p-3 space-y-2">
+              <div className="flex items-end gap-2">
+                <Textarea
+                  value={draft}
+                  onChange={(e) => setDraft(e.target.value)}
+                  placeholder="메시지를 입력하세요…"
+                  className="min-h-[72px] flex-1"
+                />
+                <input
+                  type="file"
+                  accept="image/*,video/*"
+                  className="hidden"
+                  ref={fileInputRef}
+                  onChange={(e) => {
+                    if (e.target.files && e.target.files[0]) {
+                      sendMedia(e.target.files[0]);
+                    }
+                  }}
+                />
+                <Button type="button" variant="secondary" onClick={() => fileInputRef.current?.click()}>
+                  <ImageIcon className="h-4 w-4" />
+                </Button>
+                <Button onClick={send} disabled={!draft.trim()}>보내기</Button>
+              </div>
+            </div>
           </div>
-        </div>
 
-        <div>
-          <div className="text-xs text-gray-500 mb-1">설명</div>
-          <div className="text-sm text-gray-900 break-words whitespace-normal min-h-[2.5rem] leading-snug">
-            {report.description}
+          <div className="pt-2">
+            <Button variant="secondary" onClick={() => navigate(-1)}>
+              <ArrowLeft className="h-4 w-4 mr-2" /> 목록으로
+            </Button>
           </div>
-        </div>
+        </CardContent>
+      </Card>
 
-        <div className="pt-2">
-          <Button variant="secondary" onClick={() => navigate(-1)}>
-            <ArrowLeft className="h-4 w-4 mr-2" /> 목록으로
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+      {/* 미리보기 다이얼로그 */}
+      <Dialog open={!!previewUrl} onOpenChange={(o) => !o && setPreviewUrl(null)}>
+        <DialogContent className="max-w-4x">
+          {previewUrl && previewType === "image" && (
+            <img src={previewUrl} alt="미리보기" className="w-full h-auto rounded-lg" />
+          )}
+          {previewUrl && previewType === "video" && (
+            <video src={previewUrl} controls autoPlay className="w-full h-auto rounded-lg" />
+          )}
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
