@@ -6,6 +6,19 @@ import {
   FileText,
   MapPin,
 } from "lucide-react";
+import { Bar, BarChart, XAxis, YAxis } from "recharts";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "~/components/ui/chart";
 import type { Route } from "./+types/home";
 
 export function meta({}: Route.MetaArgs) {
@@ -75,6 +88,24 @@ const mockReports: Report[] = [
   },
 ];
 
+const incidentData = [
+  { month: "1월", incidents: 12 },
+  { month: "2월", incidents: 8 },
+  { month: "3월", incidents: 15 },
+  { month: "4월", incidents: 6 },
+  { month: "5월", incidents: 10 },
+  { month: "6월", incidents: 18 },
+  { month: "7월", incidents: 14 },
+  { month: "8월", incidents: 9 },
+];
+
+const chartConfig = {
+  incidents: {
+    label: "사고 건수",
+    color: "var(--primary)",
+  },
+};
+
 function getStatusIcon(status: Report["status"]) {
   switch (status) {
     case "completed":
@@ -108,6 +139,74 @@ export default function Home() {
             Whistlenote 제보 대시보드
           </h1>
           <p className="text-gray-600 mt-2">현장: 민이앤아이 1 현장</p>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+          <div className="lg:col-span-2">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-primary">
+                  월별 사고 발생 현황
+                </CardTitle>
+                <CardDescription>최근 8개월간 사고 발생 건수</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ChartContainer config={chartConfig}>
+                  <BarChart data={incidentData}>
+                    <XAxis
+                      dataKey="month"
+                      tickLine={false}
+                      tickMargin={10}
+                      axisLine={false}
+                    />
+                    <YAxis tickLine={false} axisLine={false} tickMargin={8} />
+                    <ChartTooltip
+                      cursor={false}
+                      content={<ChartTooltipContent hideLabel />}
+                    />
+                    <Bar
+                      dataKey="incidents"
+                      fill="var(--color-incidents)"
+                      radius={4}
+                    />
+                  </BarChart>
+                </ChartContainer>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-primary">이번 달 통계</CardTitle>
+                <CardDescription>8월 현재 현황</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600">총 제보</span>
+                  <span className="text-2xl font-bold text-primary">9건</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600">완료</span>
+                  <span className="text-lg font-semibold text-green-600">
+                    2건
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600">진행 중</span>
+                  <span className="text-lg font-semibold text-yellow-600">
+                    3건
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600">대기 중</span>
+                  <span className="text-lg font-semibold text-red-600">
+                    1건
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
 
         <div className="bg-white shadow overflow-hidden sm:rounded-lg border-t-4 border-primary">
