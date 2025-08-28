@@ -1,7 +1,7 @@
+import { useOutletContext } from "react-router";
+
 import { Calendar, FileText, MapPin } from "lucide-react";
 import { Bar, BarChart, XAxis, YAxis } from "recharts";
-
-import type { JSX } from "react";
 import {
   Card,
   CardContent,
@@ -14,51 +14,20 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "~/components/ui/chart";
+import { ReportStatus } from "~/types";
+import type { LayoutContext } from "../layouts/app-layout";
 
-interface Report {
-  id: string;
-  siteName: string;
-  siteId: string;
-  location: string;
-  date: Date;
-  status: ReportStatus;
-  type: string;
-  description: string;
-}
+export default function DashboardPageRoute() {
+  const { filteredReports, stats, chartData, getStatusIcon, getStatusBadge } =
+    useOutletContext<LayoutContext>();
 
-enum ReportStatus {
-  completed = "완료",
-  inProgress = "진행중",
-  pending = "대기중",
-}
-
-interface DashboardPageProps {
-  filteredReports: Report[];
-  stats: {
-    completed: number;
-    inProgress: number;
-    pending: number;
-    total: number;
+  const chartConfig = {
+    incidents: {
+      label: "사고 건수",
+      color: "var(--primary)",
+    },
   };
-  chartData: { month: string; incidents: number }[];
-  getStatusIcon: (status: ReportStatus) => JSX.Element;
-  getStatusBadge: (status: ReportStatus) => JSX.Element;
-}
 
-const chartConfig = {
-  incidents: {
-    label: "사고 건수",
-    color: "var(--primary)",
-  },
-};
-
-export function DashboardPage({
-  filteredReports,
-  stats,
-  chartData,
-  getStatusIcon,
-  getStatusBadge,
-}: DashboardPageProps) {
   return (
     <>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">

@@ -1,20 +1,11 @@
+import { useMemo, useState, type JSX } from "react";
+import { Outlet, useLocation } from "react-router";
+
 import { AlertTriangle, CheckCircle, Clock } from "lucide-react";
-import { useState } from "react";
 
-import { DashboardPage } from "~/components/DashboardPage";
 import { Navigation } from "~/components/Navigation";
-import { ReportsPage } from "~/components/ReportsPage";
-import { RewardsPage } from "~/components/RewardsPage";
 import { SiteSelector } from "~/components/SiteSelector";
-import { ReportStatus, type PageType, type Report, type Site } from "~/types";
-import type { Route } from "./+types/home";
-
-export function meta({}: Route.MetaArgs) {
-  return [
-    { title: "휘슬노트 제보 대시보드" },
-    { name: "description", content: "휘슬노트 제보 대시보드" },
-  ];
-}
+import { ReportStatus, type Report, type Site } from "~/types";
 
 const sites: Site[] = [
   { id: "all", name: "전체 현장", location: "모든 현장", totalReports: 32 },
@@ -125,53 +116,48 @@ const mockReports: Report[] = [
   },
 ];
 
-const generateChartData = (reports: Report[]) => {
-  const monthlyData: { [key: string]: number } = {};
-
-  reports.forEach((report) => {
-    const month = `${report.date.getMonth() + 1}월`;
-    monthlyData[month] = (monthlyData[month] || 0) + 1;
+function generateChartData(reports: Report[]) {
+  const monthly: Record<string, number> = {};
+  reports.forEach((r) => {
+    const m = `${r.date.getMonth() + 1}월`;
+    monthly[m] = (monthly[m] || 0) + 1;
   });
-
-  return ["3월", "4월", "5월", "6월", "7월", "8월"].map((month) => ({
-    month,
-    incidents: monthlyData[month] || 0,
+  return ["3월", "4월", "5월", "6월", "7월", "8월"].map((m) => ({
+    month: m,
+    incidents: monthly[m] || 0,
   }));
+}
+
+export type LayoutContext = {
+  sites: Site[];
+  selectedSite: string;
+  setSelectedSite: (v: string) => void;
+  filteredReports: Report[];
+  stats: {
+    completed: number;
+    inProgress: number;
+    pending: number;
+    total: number;
+  };
+  chartData: { month: string; incidents: number }[];
+  getStatusIcon: (s: ReportStatus) => JSX.Element;
+  getStatusBadge: (s: ReportStatus) => JSX.Element;
 };
 
-function getStatusIcon(status: ReportStatus) {
-  switch (status) {
-    case ReportStatus.completed:
-      return <CheckCircle className="h-4 w-4 text-green-500" />;
-    case ReportStatus.inProgress:
-      return <Clock className="h-4 w-4 text-yellow-500" />;
-    case ReportStatus.pending:
-      return <AlertTriangle className="h-4 w-4 text-red-500" />;
-  }
-}
-
-function getStatusBadge(status: ReportStatus) {
-  const baseClasses =
-    "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium";
-  const colorMap = {
-    [ReportStatus.completed]: "bg-green-100 text-green-800",
-    [ReportStatus.inProgress]: "bg-yellow-100 text-yellow-800",
-    [ReportStatus.pending]: "bg-red-100 text-red-800",
-  };
-  return <span className={`${baseClasses} ${colorMap[status]}`}>{status}</span>;
-}
-
-export default function Main() {
+export default function AppLayout() {
+  const { pathname } = useLocation();
   const [selectedSite, setSelectedSite] = useState<string>("all");
   const [siteSelectionOpen, setSiteSelectionOpen] = useState(false);
-  const [currentPage, setCurrentPage] = useState<PageType>("dashboard");
 
-  const filteredReports =
-    selectedSite === "all"
-      ? mockReports
-      : mockReports.filter((report) => report.siteId === selectedSite);
+  const filteredReports = useMemo(
+    () =>
+      selectedSite === "all"
+        ? mockReports
+        : mockReports.filter((r) => r.siteId === selectedSite),
+    [selectedSite]
+  );
 
-  const getFilteredStats = () => {
+  const stats = useMemo(() => {
     const completed = filteredReports.filter(
       (r) => r.status === ReportStatus.completed
     ).length;
@@ -182,70 +168,83 @@ export default function Main() {
       (r) => r.status === ReportStatus.pending
     ).length;
     return { completed, inProgress, pending, total: filteredReports.length };
-  };
+  }, [filteredReports]);
 
-  const stats = getFilteredStats();
-  const chartData = generateChartData(filteredReports);
+  const chartData = useMemo(
+    () => generateChartData(filteredReports),
+    [filteredReports]
+  );
 
-  const getPageTitle = () => {
-    switch (currentPage) {
-      case "dashboard":
-        return "대시보드";
-      case "reports":
-        return "제보 관리";
-      case "rewards":
-        return "포상 관리";
-      default:
-        return "대시보드";
+  const title = useMemo(() => {
+    if (pathname.startsWith("/reports")) return "제보 관리";
+    if (pathname.startsWith("/rewards")) return "포상 관리";
+    return "대시보드";
+  }, [pathname]);
+
+  const getStatusIcon = (status: ReportStatus) => {
+    switch (status) {
+      case ReportStatus.completed:
+        return <CheckCircle className="h-4 w-4 text-green-500" />;
+      case ReportStatus.inProgress:
+        return <Clock className="h-4 w-4 text-yellow-500" />;
+      case ReportStatus.pending:
+        return <AlertTriangle className="h-4 w-4 text-red-500" />;
     }
   };
 
-  const renderCurrentPage = () => {
-    const props = {
-      filteredReports,
-      getStatusIcon,
-      getStatusBadge,
-    };
+  const getStatusBadge = (status: ReportStatus) => {
+    const base =
+      "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium";
+    const color = {
+      [ReportStatus.completed]: "bg-green-100 text-green-800",
+      [ReportStatus.inProgress]: "bg-yellow-100 text-yellow-800",
+      [ReportStatus.pending]: "bg-red-100 text-red-800",
+    }[status];
+    return <span className={`${base} ${color}`}>{status}</span>;
+  };
 
-    switch (currentPage) {
-      case "dashboard":
-        return <DashboardPage {...props} stats={stats} chartData={chartData} />;
-      case "reports":
-        return <ReportsPage {...props} />;
-      case "rewards":
-        return <RewardsPage />;
-      default:
-        return <DashboardPage {...props} stats={stats} chartData={chartData} />;
-    }
+  const ctx: LayoutContext = {
+    sites,
+    selectedSite,
+    setSelectedSite,
+    filteredReports,
+    stats,
+    chartData,
+    getStatusIcon,
+    getStatusBadge,
   };
 
   return (
     <div className="h-screen bg-gray-50 flex">
-      <Navigation currentPage={currentPage} onPageChange={setCurrentPage} />
+      <Navigation />
 
-      {/* Main Content */}
+      {/* Main */}
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Top Navigation Bar */}
+        {/* Top Bar */}
         <div className="bg-white shadow-sm border-b flex-shrink-0">
-          <div className="flex justify-between items-center pt-4 px-6">
-            <h1 className="text-2xl font-bold text-primary">
-              {getPageTitle()}
-            </h1>
+          <div className="flex items-center justify-between gap-4 py-4 px-6">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-4 flex-wrap">
+                <h1 className="text-2xl font-bold text-primary whitespace-nowrap">
+                  {title}
+                </h1>
+
+                <SiteSelector
+                  sites={sites}
+                  selectedSite={selectedSite}
+                  onSiteChange={setSelectedSite}
+                  isOpen={siteSelectionOpen}
+                  onToggle={() => setSiteSelectionOpen(!siteSelectionOpen)}
+                />
+              </div>
+            </div>
           </div>
-
-          <SiteSelector
-            sites={sites}
-            selectedSite={selectedSite}
-            onSiteChange={setSelectedSite}
-            isOpen={siteSelectionOpen}
-            onToggle={() => setSiteSelectionOpen(!siteSelectionOpen)}
-          />
         </div>
 
-        {/* Page Content - Scrollable */}
-        <div className="flex-1 overflow-y-auto">
-          <div className="p-6">{renderCurrentPage()}</div>
-        </div>
+        {/* Routed Content */}
+        <main className="flex-1 overflow-y-auto p-6">
+          <Outlet context={ctx} />
+        </main>
       </div>
     </div>
   );

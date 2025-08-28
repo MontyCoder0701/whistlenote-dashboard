@@ -25,8 +25,8 @@ export function SiteSelector({
   const currentSite = sites.find((site) => site.id === selectedSite);
 
   return (
-    <div className="px-6">
-      <div className="flex justify-between items-center py-4">
+    <div>
+      <div className="flex justify-between items-center py-2">
         <div className="flex-1">
           <button
             onClick={onToggle}

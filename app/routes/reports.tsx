@@ -1,4 +1,5 @@
-import type { JSX } from "react";
+import { useOutletContext } from "react-router";
+
 import {
   Card,
   CardContent,
@@ -6,35 +7,12 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
+import type { LayoutContext } from "../layouts/app-layout";
 
-interface Report {
-  id: string;
-  siteName: string;
-  siteId: string;
-  location: string;
-  date: Date;
-  status: ReportStatus;
-  type: string;
-  description: string;
-}
+export default function ReportsPageRoute() {
+  const { filteredReports, getStatusIcon, getStatusBadge } =
+    useOutletContext<LayoutContext>();
 
-enum ReportStatus {
-  completed = "완료",
-  inProgress = "진행중",
-  pending = "대기중",
-}
-
-interface ReportsPageProps {
-  filteredReports: Report[];
-  getStatusIcon: (status: ReportStatus) => JSX.Element;
-  getStatusBadge: (status: ReportStatus) => JSX.Element;
-}
-
-export function ReportsPage({
-  filteredReports,
-  getStatusIcon,
-  getStatusBadge,
-}: ReportsPageProps) {
   return (
     <Card>
       <CardHeader>

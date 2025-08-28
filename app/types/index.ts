@@ -21,5 +21,3 @@ export interface Site {
   location: string;
   totalReports: number;
 }
-
-export type PageType = "dashboard" | "reports" | "rewards";
