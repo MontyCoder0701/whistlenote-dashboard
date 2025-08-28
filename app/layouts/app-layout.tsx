@@ -225,7 +225,7 @@ export default function AppLayout() {
           <div className="flex items-center justify-between gap-4 py-4 px-4 md:px-6">
             {/* Left side: title + site selector */}
             <div className="flex flex-col min-w-0">
-              <h1 className="text-2xl font-bold text-primary whitespace-nowrap pl-1 md:pl-3">
+              <h1 className="text-2xl font-bold text-primary whitespace-nowrap pl-3">
                 {title}
               </h1>
 

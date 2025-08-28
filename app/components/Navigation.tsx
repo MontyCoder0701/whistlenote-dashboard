@@ -4,6 +4,7 @@ import { Button } from "~/components/ui/button";
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -88,7 +89,7 @@ export function MobileNavTrigger() {
         <SheetContent side="right" className="p-0 w-80">
           <SheetHeader className="p-6 pb-3 text-left">
             <SheetTitle className="text-primary">Whistlenote</SheetTitle>
-            <p className="text-sm text-gray-600">건설 제보 대시보드</p>
+            <SheetDescription className="text-sm text-gray-600">건설 제보 대시보드</SheetDescription>
           </SheetHeader>
 
           <nav className="p-4">
