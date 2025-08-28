@@ -1,12 +1,17 @@
+import { useState } from "react";
+
 import {
   AlertTriangle,
+  Building,
   Calendar,
   CheckCircle,
   Clock,
   FileText,
   MapPin,
+  User,
 } from "lucide-react";
 import { Bar, BarChart, XAxis, YAxis } from "recharts";
+
 import {
   Card,
   CardContent,
@@ -31,6 +36,7 @@ export function meta({}: Route.MetaArgs) {
 interface Report {
   id: string;
   siteName: string;
+  siteId: string;
   location: string;
   date: string;
   status: "completed" | "in-progress" | "pending";
@@ -38,10 +44,52 @@ interface Report {
   description: string;
 }
 
+interface Site {
+  id: string;
+  name: string;
+  location: string;
+  totalReports: number;
+}
+
+const sites: Site[] = [
+  { id: "all", name: "전체 현장", location: "모든 현장", totalReports: 32 },
+  {
+    id: "site1",
+    name: "민이앤아이 1 현장",
+    location: "다운타운 메인가 123번지",
+    totalReports: 9,
+  },
+  {
+    id: "site2",
+    name: "강변 아파트 단지",
+    location: "리버사이드 강변로 456번지",
+    totalReports: 8,
+  },
+  {
+    id: "site3",
+    name: "고속도로 교량 프로젝트",
+    location: "15번 국도 42km 지점",
+    totalReports: 7,
+  },
+  {
+    id: "site4",
+    name: "지하철역 확장 공사",
+    location: "중앙역 광장",
+    totalReports: 5,
+  },
+  {
+    id: "site5",
+    name: "쇼핑센터 리모델링",
+    location: "상업대로 789번지",
+    totalReports: 3,
+  },
+];
+
 const mockReports: Report[] = [
   {
     id: "1",
-    siteName: "다운타운 오피스 복합건물",
+    siteName: "민이앤아이 1 현장",
+    siteId: "site1",
     location: "다운타운 메인가 123번지",
     date: "2025-08-28",
     status: "completed",
@@ -52,6 +100,7 @@ const mockReports: Report[] = [
   {
     id: "2",
     siteName: "강변 아파트 단지",
+    siteId: "site2",
     location: "리버사이드 강변로 456번지",
     date: "2025-08-27",
     status: "in-progress",
@@ -61,6 +110,7 @@ const mockReports: Report[] = [
   {
     id: "3",
     siteName: "고속도로 교량 프로젝트",
+    siteId: "site3",
     location: "15번 국도 42km 지점",
     date: "2025-08-26",
     status: "pending",
@@ -71,6 +121,7 @@ const mockReports: Report[] = [
   {
     id: "4",
     siteName: "지하철역 확장 공사",
+    siteId: "site4",
     location: "중앙역 광장",
     date: "2025-08-25",
     status: "completed",
@@ -80,11 +131,32 @@ const mockReports: Report[] = [
   {
     id: "5",
     siteName: "쇼핑센터 리모델링",
+    siteId: "site5",
     location: "상업대로 789번지",
     date: "2025-08-24",
     status: "in-progress",
     type: "유해물질 노출",
     description: "석면 해체 작업 중 방진 마스크 미착용 발견, 안전교육 진행 중",
+  },
+  {
+    id: "6",
+    siteName: "민이앤아이 1 현장",
+    siteId: "site1",
+    location: "다운타운 메인가 123번지",
+    date: "2025-08-26",
+    status: "pending",
+    type: "작업장 정리",
+    description: "작업 도구 방치 및 통로 확보 필요",
+  },
+  {
+    id: "7",
+    siteName: "강변 아파트 단지",
+    siteId: "site2",
+    location: "리버사이드 강변로 456번지",
+    date: "2025-08-25",
+    status: "completed",
+    type: "소음 문제",
+    description: "야간 작업 소음 규정 위반, 작업시간 조정 완료",
   },
 ];
 
@@ -131,16 +203,85 @@ function getStatusBadge(status: Report["status"]) {
 }
 
 export default function Home() {
-  return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-primary">
-            Whistlenote 제보 대시보드
-          </h1>
-          <p className="text-gray-600 mt-2">현장: 민이앤아이 1 현장</p>
-        </div>
+  const [selectedSite, setSelectedSite] = useState<string>("all");
 
+  const filteredReports =
+    selectedSite === "all"
+      ? mockReports
+      : mockReports.filter((report) => report.siteId === selectedSite);
+
+  const currentSite = sites.find((site) => site.id === selectedSite);
+
+  const getFilteredStats = () => {
+    const completed = filteredReports.filter(
+      (r) => r.status === "completed"
+    ).length;
+    const inProgress = filteredReports.filter(
+      (r) => r.status === "in-progress"
+    ).length;
+    const pending = filteredReports.filter(
+      (r) => r.status === "pending"
+    ).length;
+    return { completed, inProgress, pending, total: filteredReports.length };
+  };
+
+  const stats = getFilteredStats();
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Navigation Bar */}
+      <div className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-4">
+            <div className="flex-1">
+              <h1 className="text-2xl font-bold text-primary">
+                Whistlenote 제보 대시보드
+              </h1>
+              <p className="text-sm text-gray-600 mt-1">
+                현장: {currentSite?.name}
+              </p>
+            </div>
+
+            <div className="flex items-center space-x-4">
+              <button className="p-2 rounded-full hover:bg-gray-100 transition-colors">
+                <User className="h-6 w-6 text-gray-600" />
+              </button>
+            </div>
+          </div>
+
+          {/* Site Selector */}
+          <div className="pb-4">
+            <div className="flex flex-wrap gap-2">
+              {sites.map((site) => (
+                <button
+                  key={site.id}
+                  onClick={() => setSelectedSite(site.id)}
+                  className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    selectedSite === site.id
+                      ? "bg-primary text-white"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }`}
+                >
+                  <Building className="h-4 w-4" />
+                  <span>{site.name}</span>
+                  <span
+                    className={`px-2 py-1 rounded-full text-xs ${
+                      selectedSite === site.id
+                        ? "bg-white/20 text-white"
+                        : "bg-white text-gray-600"
+                    }`}
+                  >
+                    {site.totalReports}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
           <div className="lg:col-span-2">
             <Card>
@@ -184,24 +325,26 @@ export default function Home() {
               <CardContent className="space-y-4">
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-600">총 제보</span>
-                  <span className="text-2xl font-bold text-primary">9건</span>
+                  <span className="text-2xl font-bold text-primary">
+                    {stats.total}건
+                  </span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-600">완료</span>
                   <span className="text-lg font-semibold text-green-600">
-                    2건
+                    {stats.completed}건
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-600">진행 중</span>
                   <span className="text-lg font-semibold text-yellow-600">
-                    3건
+                    {stats.inProgress}건
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-600">대기 중</span>
                   <span className="text-lg font-semibold text-red-600">
-                    1건
+                    {stats.pending}건
                   </span>
                 </div>
               </CardContent>
@@ -213,7 +356,7 @@ export default function Home() {
           <div className="px-4 py-5 sm:p-6">
             <h2 className="text-lg font-medium text-primary mb-4">최근 제보</h2>
             <div className="space-y-4">
-              {mockReports.map((report) => (
+              {filteredReports.map((report) => (
                 <div
                   key={report.id}
                   className="border border-gray-200 rounded-lg p-4 hover:shadow-md hover:border-primary/50 transition-all"
