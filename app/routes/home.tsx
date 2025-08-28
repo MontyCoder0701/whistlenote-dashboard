@@ -33,13 +33,19 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
+enum ReportStatus {
+  completed = "완료",
+  inProgress = "진행중",
+  pending = "대기중",
+}
+
 interface Report {
   id: string;
   siteName: string;
   siteId: string;
   location: string;
-  date: string;
-  status: "completed" | "in-progress" | "pending";
+  date: Date;
+  status: ReportStatus;
   type: string;
   description: string;
 }
@@ -91,8 +97,8 @@ const mockReports: Report[] = [
     siteName: "민이앤아이 1 현장",
     siteId: "site1",
     location: "다운타운 메인가 123번지",
-    date: "2025-08-28",
-    status: "completed",
+    date: new Date("2025-08-28"),
+    status: ReportStatus.completed,
     type: "낙하물 위험",
     description:
       "5층 작업장에서 안전망 미설치 및 낙하물 위험 발견, 즉시 조치 완료",
@@ -102,8 +108,8 @@ const mockReports: Report[] = [
     siteName: "강변 아파트 단지",
     siteId: "site2",
     location: "리버사이드 강변로 456번지",
-    date: "2025-08-27",
-    status: "in-progress",
+    date: new Date("2025-06-27"),
+    status: ReportStatus.inProgress,
     type: "전기 안전 위험",
     description: "지하 전기실 누수로 인한 감전 위험, 전기 안전 점검 진행 중",
   },
@@ -112,8 +118,8 @@ const mockReports: Report[] = [
     siteName: "고속도로 교량 프로젝트",
     siteId: "site3",
     location: "15번 국도 42km 지점",
-    date: "2025-08-26",
-    status: "pending",
+    date: new Date("2025-05-26"),
+    status: ReportStatus.pending,
     type: "구조물 안전 위험",
     description:
       "임시 비계 불안정으로 인한 붕괴 위험, 구조 엔지니어 검토 대기 중",
@@ -123,8 +129,8 @@ const mockReports: Report[] = [
     siteName: "지하철역 확장 공사",
     siteId: "site4",
     location: "중앙역 광장",
-    date: "2025-08-25",
-    status: "completed",
+    date: new Date("2025-03-25"),
+    status: ReportStatus.completed,
     type: "화재 위험",
     description: "용접 작업 중 가연물 근접 화재 위험, 안전 구역 설정 완료",
   },
@@ -133,8 +139,8 @@ const mockReports: Report[] = [
     siteName: "쇼핑센터 리모델링",
     siteId: "site5",
     location: "상업대로 789번지",
-    date: "2025-08-24",
-    status: "in-progress",
+    date: new Date("2025-03-24"),
+    status: ReportStatus.inProgress,
     type: "유해물질 노출",
     description: "석면 해체 작업 중 방진 마스크 미착용 발견, 안전교육 진행 중",
   },
@@ -143,8 +149,8 @@ const mockReports: Report[] = [
     siteName: "민이앤아이 1 현장",
     siteId: "site1",
     location: "다운타운 메인가 123번지",
-    date: "2025-08-26",
-    status: "pending",
+    date: new Date("2025-01-26"),
+    status: ReportStatus.pending,
     type: "작업장 정리",
     description: "작업 도구 방치 및 통로 확보 필요",
   },
@@ -153,23 +159,26 @@ const mockReports: Report[] = [
     siteName: "강변 아파트 단지",
     siteId: "site2",
     location: "리버사이드 강변로 456번지",
-    date: "2025-08-25",
-    status: "completed",
+    date: new Date("2025-01-25"),
+    status: ReportStatus.inProgress,
     type: "소음 문제",
     description: "야간 작업 소음 규정 위반, 작업시간 조정 완료",
   },
 ];
 
-const incidentData = [
-  { month: "1월", incidents: 12 },
-  { month: "2월", incidents: 8 },
-  { month: "3월", incidents: 15 },
-  { month: "4월", incidents: 6 },
-  { month: "5월", incidents: 10 },
-  { month: "6월", incidents: 18 },
-  { month: "7월", incidents: 14 },
-  { month: "8월", incidents: 9 },
-];
+const generateChartData = (reports: Report[]) => {
+  const monthlyData: { [key: string]: number } = {};
+
+  reports.forEach((report) => {
+    const month = `${report.date.getMonth() + 1}월`;
+    monthlyData[month] = (monthlyData[month] || 0) + 1;
+  });
+
+  return ["3월", "4월", "5월", "6월", "7월", "8월"].map((month) => ({
+    month,
+    incidents: monthlyData[month] || 0,
+  }));
+};
 
 const chartConfig = {
   incidents: {
@@ -180,11 +189,11 @@ const chartConfig = {
 
 function getStatusIcon(status: Report["status"]) {
   switch (status) {
-    case "completed":
+    case ReportStatus.completed:
       return <CheckCircle className="h-4 w-4 text-green-500" />;
-    case "in-progress":
+    case ReportStatus.inProgress:
       return <Clock className="h-4 w-4 text-yellow-500" />;
-    case "pending":
+    case ReportStatus.pending:
       return <AlertTriangle className="h-4 w-4 text-red-500" />;
   }
 }
@@ -193,11 +202,11 @@ function getStatusBadge(status: Report["status"]) {
   const baseClasses =
     "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium";
   switch (status) {
-    case "completed":
+    case ReportStatus.completed:
       return `${baseClasses} bg-green-100 text-green-800`;
-    case "in-progress":
+    case ReportStatus.inProgress:
       return `${baseClasses} bg-yellow-100 text-yellow-800`;
-    case "pending":
+    case ReportStatus.pending:
       return `${baseClasses} bg-red-100 text-red-800`;
   }
 }
@@ -214,18 +223,19 @@ export default function Home() {
 
   const getFilteredStats = () => {
     const completed = filteredReports.filter(
-      (r) => r.status === "completed"
+      (r) => r.status === ReportStatus.completed
     ).length;
     const inProgress = filteredReports.filter(
-      (r) => r.status === "in-progress"
+      (r) => r.status === ReportStatus.inProgress
     ).length;
     const pending = filteredReports.filter(
-      (r) => r.status === "pending"
+      (r) => r.status === ReportStatus.pending
     ).length;
     return { completed, inProgress, pending, total: filteredReports.length };
   };
 
   const stats = getFilteredStats();
+  const chartData = generateChartData(filteredReports);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -289,18 +299,18 @@ export default function Home() {
                 <CardTitle className="text-primary">
                   월별 사고 발생 현황
                 </CardTitle>
-                <CardDescription>최근 8개월간 사고 발생 건수</CardDescription>
+                <CardDescription>최근 6개월간 사고 발생 건수</CardDescription>
               </CardHeader>
               <CardContent>
                 <ChartContainer config={chartConfig}>
-                  <BarChart data={incidentData}>
+                  <BarChart data={chartData}>
                     <XAxis
                       dataKey="month"
                       tickLine={false}
                       tickMargin={10}
                       axisLine={false}
                     />
-                    <YAxis tickLine={false} axisLine={false} tickMargin={8} />
+                    <YAxis tickLine={false} axisLine={false} tickMargin={6} />
                     <ChartTooltip
                       cursor={false}
                       content={<ChartTooltipContent hideLabel />}
@@ -330,19 +340,25 @@ export default function Home() {
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">완료</span>
+                  <span className="text-sm text-gray-600">
+                    {ReportStatus.completed}
+                  </span>
                   <span className="text-lg font-semibold text-green-600">
                     {stats.completed}건
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">진행 중</span>
+                  <span className="text-sm text-gray-600">
+                    {ReportStatus.inProgress}
+                  </span>
                   <span className="text-lg font-semibold text-yellow-600">
                     {stats.inProgress}건
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">대기 중</span>
+                  <span className="text-sm text-gray-600">
+                    {ReportStatus.pending}
+                  </span>
                   <span className="text-lg font-semibold text-red-600">
                     {stats.pending}건
                   </span>
@@ -393,11 +409,7 @@ export default function Home() {
                           <div className="flex items-center space-x-1">
                             {getStatusIcon(report.status)}
                             <span className={getStatusBadge(report.status)}>
-                              {report.status === "completed"
-                                ? "완료"
-                                : report.status === "in-progress"
-                                  ? "진행 중"
-                                  : "대기 중"}
+                              {report.status}
                             </span>
                           </div>
                         </div>
