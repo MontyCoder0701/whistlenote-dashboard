@@ -2,13 +2,18 @@ import { useState } from "react";
 
 import {
   AlertTriangle,
+  BarChart3,
   Building,
   Calendar,
   CheckCircle,
+  ChevronDown,
+  ChevronUp,
   Clock,
   FileText,
+  Home,
+  LogOut,
   MapPin,
-  User,
+  Settings,
 } from "lucide-react";
 import { Bar, BarChart, XAxis, YAxis } from "recharts";
 
@@ -209,8 +214,9 @@ function getStatusBadge(status: Report["status"]) {
   return <span className={`${baseClasses} ${colorMap[status]}`}>{status}</span>;
 }
 
-export default function Home() {
+export default function Main() {
   const [selectedSite, setSelectedSite] = useState<string>("all");
+  const [siteSelectionOpen, setSiteSelectionOpen] = useState(false);
 
   const filteredReports =
     selectedSite === "all"
@@ -235,185 +241,259 @@ export default function Home() {
   const stats = getFilteredStats();
   const chartData = generateChartData(filteredReports);
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Navigation Bar */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <div className="flex-1">
-              <h1 className="text-2xl font-bold text-primary">
-                Whistlenote 제보 대시보드
-              </h1>
-              <p className="text-sm text-gray-600 mt-1">
-                현장: {currentSite?.name}
-              </p>
-            </div>
+  const navigationItems = [
+    { name: "대시보드", icon: Home, active: true },
+    { name: "통계", icon: BarChart3, active: false },
+  ];
 
-            <div className="flex items-center space-x-4">
-              <button className="p-2 rounded-full hover:bg-gray-100 transition-colors">
-                <User className="h-6 w-6 text-gray-600" />
-              </button>
-            </div>
+  const accountMenuItems = [
+    { name: "계정 설정", icon: Settings },
+    { name: "로그아웃", icon: LogOut },
+  ];
+
+  return (
+    <div className="h-screen bg-gray-50 flex">
+      {/* Sidebar */}
+      <div className="w-64 bg-white shadow-lg flex-shrink-0">
+        <div className="flex flex-col h-screen">
+          {/* Logo/Brand */}
+          <div className="p-6 border-b">
+            <h2 className="text-xl font-bold text-primary">Whistlenote</h2>
+            <p className="text-sm text-gray-600 mt-1">제보 대시보드</p>
           </div>
 
-          {/* Site Selector */}
-          <div className="pb-4">
-            <div className="flex flex-wrap gap-2">
-              {sites.map((site) => (
-                <button
-                  key={site.id}
-                  onClick={() => setSelectedSite(site.id)}
-                  className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    selectedSite === site.id
-                      ? "bg-primary text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
-                >
-                  <Building className="h-4 w-4" />
-                  <span>{site.name}</span>
-                  <span
-                    className={`px-2 py-1 rounded-full text-xs ${
-                      selectedSite === site.id
-                        ? "bg-white/20 text-white"
-                        : "bg-white text-gray-600"
+          {/* Navigation */}
+          <nav className="flex-1 p-4">
+            <ul className="space-y-2">
+              {navigationItems.map((item) => (
+                <li key={item.name}>
+                  <button
+                    className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-colors ${
+                      item.active
+                        ? "bg-primary text-white"
+                        : "text-gray-700 hover:bg-gray-100"
                     }`}
                   >
-                    {site.totalReports}
-                  </span>
-                </button>
+                    <item.icon className="h-5 w-5" />
+                    <span className="font-medium">{item.name}</span>
+                  </button>
+                </li>
               ))}
+            </ul>
+
+            {/* Account Menu Items */}
+            <div className="mt-8 pt-4 border-t">
+              <ul className="space-y-2">
+                {accountMenuItems.map((item) => (
+                  <li key={item.name}>
+                    <button className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-colors text-gray-700 hover:bg-gray-100">
+                      <item.icon className="h-5 w-5" />
+                      <span className="font-medium">{item.name}</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
             </div>
-          </div>
+          </nav>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-          <div className="lg:col-span-2">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-primary">
-                  월별 사고 발생 현황
-                </CardTitle>
-                <CardDescription>최근 6개월간 사고 발생 건수</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ChartContainer config={chartConfig}>
-                  <BarChart data={chartData}>
-                    <XAxis
-                      dataKey="month"
-                      tickLine={false}
-                      tickMargin={10}
-                      axisLine={false}
-                    />
-                    <YAxis tickLine={false} axisLine={false} tickMargin={6} />
-                    <ChartTooltip
-                      cursor={false}
-                      content={<ChartTooltipContent hideLabel />}
-                    />
-                    <Bar
-                      dataKey="incidents"
-                      fill="var(--color-incidents)"
-                      radius={4}
-                    />
-                  </BarChart>
-                </ChartContainer>
-              </CardContent>
-            </Card>
-          </div>
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Top Navigation Bar */}
+        <div className="bg-white shadow-sm border-b flex-shrink-0">
+          <div className="px-6">
+            <div className="flex justify-between items-center py-4">
+              <div className="flex-1">
+                <h1 className="text-2xl font-bold text-primary">대시보드</h1>
+                <p className="text-sm text-gray-600 mt-1">
+                  현장: {currentSite?.name}
+                </p>
+              </div>
 
-          <div>
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-primary">이번 달 통계</CardTitle>
-                <CardDescription>8월 현재 현황</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">총 제보</span>
-                  <span className="text-2xl font-bold text-primary">
-                    {stats.total}건
-                  </span>
+              <button
+                onClick={() => setSiteSelectionOpen(!siteSelectionOpen)}
+                className="flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 transition-colors"
+              >
+                <span>현장 선택</span>
+                {siteSelectionOpen ? (
+                  <ChevronUp className="h-4 w-4" />
+                ) : (
+                  <ChevronDown className="h-4 w-4" />
+                )}
+              </button>
+            </div>
+
+            {/* Site Selector - Collapsible */}
+            {siteSelectionOpen && (
+              <div className="pb-4">
+                <div className="flex flex-wrap gap-2">
+                  {sites.map((site) => (
+                    <button
+                      key={site.id}
+                      onClick={() => setSelectedSite(site.id)}
+                      className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        selectedSite === site.id
+                          ? "bg-primary text-white"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      }`}
+                    >
+                      <Building className="h-4 w-4" />
+                      <span>{site.name}</span>
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs ${
+                          selectedSite === site.id
+                            ? "bg-white/20 text-white"
+                            : "bg-white text-gray-600"
+                        }`}
+                      >
+                        {site.totalReports}
+                      </span>
+                    </button>
+                  ))}
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">
-                    {ReportStatus.completed}
-                  </span>
-                  <span className="text-lg font-semibold text-green-600">
-                    {stats.completed}건
-                  </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">
-                    {ReportStatus.inProgress}
-                  </span>
-                  <span className="text-lg font-semibold text-yellow-600">
-                    {stats.inProgress}건
-                  </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">
-                    {ReportStatus.pending}
-                  </span>
-                  <span className="text-lg font-semibold text-red-600">
-                    {stats.pending}건
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
+              </div>
+            )}
           </div>
         </div>
 
-        <div className="bg-white shadow overflow-hidden sm:rounded-lg border-t-4 border-primary">
-          <div className="px-4 py-5 sm:p-6">
-            <h2 className="text-lg font-medium text-primary mb-4">최근 제보</h2>
-            <div className="space-y-4">
-              {filteredReports.map((report) => (
-                <div
-                  key={report.id}
-                  className="border border-gray-200 rounded-lg p-4 hover:shadow-md hover:border-primary/50 transition-all"
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-start space-x-3 flex-1">
-                      <div className="flex-shrink-0 mt-1">
-                        <FileText className="h-5 w-5 text-primary" />
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="text-lg font-medium text-gray-900">
-                          {report.siteName}
-                        </h3>
-                        <div className="flex items-center space-x-4 text-sm text-gray-500 mt-1">
-                          <div className="flex items-center space-x-1">
-                            <MapPin className="h-4 w-4" />
-                            <span>{report.location}</span>
+        {/* Dashboard Content - Scrollable */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="p-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+              <div className="lg:col-span-2">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-primary">
+                      월별 사고 발생 현황
+                    </CardTitle>
+                    <CardDescription>
+                      최근 6개월간 사고 발생 건수
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ChartContainer config={chartConfig}>
+                      <BarChart data={chartData}>
+                        <XAxis
+                          dataKey="month"
+                          tickLine={false}
+                          tickMargin={10}
+                          axisLine={false}
+                        />
+                        <YAxis
+                          tickLine={false}
+                          axisLine={false}
+                          tickMargin={6}
+                        />
+                        <ChartTooltip
+                          cursor={false}
+                          content={<ChartTooltipContent hideLabel />}
+                        />
+                        <Bar
+                          dataKey="incidents"
+                          fill="var(--color-incidents)"
+                          radius={4}
+                        />
+                      </BarChart>
+                    </ChartContainer>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <div>
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-primary">이번 달 통계</CardTitle>
+                    <CardDescription>8월 현재 현황</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">총 제보</span>
+                      <span className="text-2xl font-bold text-primary">
+                        {stats.total}건
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">
+                        {ReportStatus.completed}
+                      </span>
+                      <span className="text-lg font-semibold text-green-600">
+                        {stats.completed}건
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">
+                        {ReportStatus.inProgress}
+                      </span>
+                      <span className="text-lg font-semibold text-yellow-600">
+                        {stats.inProgress}건
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">
+                        {ReportStatus.pending}
+                      </span>
+                      <span className="text-lg font-semibold text-red-600">
+                        {stats.pending}건
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+
+            <div className="bg-white shadow overflow-hidden sm:rounded-lg border-t-4 border-primary">
+              <div className="px-4 py-5 sm:p-6">
+                <h2 className="text-lg font-medium text-primary mb-4">
+                  최근 제보
+                </h2>
+                <div className="space-y-4">
+                  {filteredReports.map((report) => (
+                    <div
+                      key={report.id}
+                      className="border border-gray-200 rounded-lg p-4 hover:shadow-md hover:border-primary/50 transition-all"
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-start space-x-3 flex-1">
+                          <div className="flex-shrink-0 mt-1">
+                            <FileText className="h-5 w-5 text-primary" />
                           </div>
-                          <div className="flex items-center space-x-1">
-                            <Calendar className="h-4 w-4" />
-                            <span>
-                              {new Date(report.date).toLocaleDateString()}
-                            </span>
-                          </div>
-                        </div>
-                        <p className="text-gray-600 mt-2">
-                          {report.description}
-                        </p>
-                        <div className="flex items-center space-x-2 mt-3">
-                          <span className="text-sm font-medium text-gray-900">
-                            {report.type}
-                          </span>
-                          <span className="text-gray-300">•</span>
-                          <div className="flex items-center space-x-1">
-                            {getStatusIcon(report.status)}
-                            {getStatusBadge(report.status)}
+                          <div className="flex-1">
+                            <h3 className="text-lg font-medium text-gray-900">
+                              {report.siteName}
+                            </h3>
+                            <div className="flex items-center space-x-4 text-sm text-gray-500 mt-1">
+                              <div className="flex items-center space-x-1">
+                                <MapPin className="h-4 w-4" />
+                                <span>{report.location}</span>
+                              </div>
+                              <div className="flex items-center space-x-1">
+                                <Calendar className="h-4 w-4" />
+                                <span>
+                                  {new Date(report.date).toLocaleDateString()}
+                                </span>
+                              </div>
+                            </div>
+                            <p className="text-gray-600 mt-2">
+                              {report.description}
+                            </p>
+                            <div className="flex items-center space-x-2 mt-3">
+                              <span className="text-sm font-medium text-gray-900">
+                                {report.type}
+                              </span>
+                              <span className="text-gray-300">•</span>
+                              <div className="flex items-center space-x-1">
+                                {getStatusIcon(report.status)}
+                                {getStatusBadge(report.status)}
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>
                     </div>
-                  </div>
+                  ))}
                 </div>
-              ))}
+              </div>
             </div>
           </div>
         </div>
