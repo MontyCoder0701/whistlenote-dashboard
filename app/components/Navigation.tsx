@@ -1,5 +1,13 @@
-import { Coins, Home, MessageCircleWarning, Settings } from "lucide-react";
+import { Coins, Home, Menu, MessageCircleWarning, Settings } from "lucide-react";
 import { NavLink } from "react-router";
+import { Button } from "~/components/ui/button";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "~/components/ui/sheet";
 
 type NavItem = {
   name: string;
@@ -8,15 +16,16 @@ type NavItem = {
   end?: boolean;
 };
 
-export function Navigation() {
-  const items: NavItem[] = [
-    { name: "대시보드", to: "/", icon: Home, end: true },
-    { name: "제보", to: "/reports", icon: MessageCircleWarning },
-    { name: "포상", to: "/rewards", icon: Coins },
-  ];
+const items: NavItem[] = [
+  { name: "대시보드", to: "/", icon: Home, end: true },
+  { name: "제보", to: "/reports", icon: MessageCircleWarning },
+  { name: "포상", to: "/rewards", icon: Coins },
+];
 
+export function Navigation() {
+  // Desktop / tablet sidebar only
   return (
-    <div className="w-64 bg-white shadow-lg flex-shrink-0">
+    <aside className="hidden md:flex w-64 bg-white shadow-lg flex-shrink-0">
       <div className="flex flex-col h-screen">
         {/* Logo/Brand */}
         <NavLink to={"/"} className="p-6 border-b">
@@ -33,10 +42,9 @@ export function Navigation() {
                   to={item.to}
                   end={item.end}
                   className={({ isActive }) =>
-                    `w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
-                      isActive
-                        ? "bg-primary text-white"
-                        : "text-gray-700 hover:bg-gray-100"
+                    `w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive
+                      ? "bg-primary text-white"
+                      : "text-gray-700 hover:bg-gray-100"
                     }`
                   }
                 >
@@ -50,17 +58,74 @@ export function Navigation() {
 
         {/* User Profile */}
         <div className="p-4 border-t">
-          <div className="flex items-center space-x-3 px-4 py-3">
+          <div className="flex items-center gap-3 px-4 py-3">
             <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
               <Settings className="h-4 w-4 text-gray-600" />
             </div>
             <div className="flex-1 text-left">
-              <p className="text-sm font-medium text-gray-900">관리자</p>
+              <p className="text-sm font-medium text-gray-900">회사 관리자</p>
               <p className="text-xs text-gray-500">admin@example.com</p>
             </div>
           </div>
         </div>
       </div>
+    </aside>
+  );
+}
+
+// Mobile hamburger -> Sheet (slide-over)
+export function MobileNavTrigger() {
+  return (
+    <div className="md:hidden">
+      <Sheet>
+        <SheetTrigger asChild>
+          <Button variant="ghost" size="icon" className="-ml-2">
+            <Menu className="h-5 w-5" />
+            <span className="sr-only">메뉴 열기</span>
+          </Button>
+        </SheetTrigger>
+
+        <SheetContent side="right" className="p-0 w-80">
+          <SheetHeader className="p-6 pb-3 text-left">
+            <SheetTitle className="text-primary">Whistlenote</SheetTitle>
+            <p className="text-sm text-gray-600">건설 제보 대시보드</p>
+          </SheetHeader>
+
+          <nav className="p-4">
+            <ul className="space-y-1">
+              {items.map((item) => (
+                <li key={item.to}>
+                  <NavLink
+                    to={item.to}
+                    end={item.end}
+                    className={({ isActive }) =>
+                      `flex items-center gap-3 px-4 py-3 rounded-lg text-base ${isActive
+                        ? "bg-primary text-white"
+                        : "text-gray-800 hover:bg-gray-100"
+                      }`
+                    }
+                  >
+                    <item.icon className="h-5 w-5" />
+                    <span>{item.name}</span>
+                  </NavLink>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          <div className="mt-auto border-t p-4">
+            <div className="flex items-center gap-3 px-4 py-3">
+              <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+                <Settings className="h-4 w-4 text-gray-600" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-medium text-gray-900">관리자</p>
+                <p className="text-xs text-gray-500">admin@example.com</p>
+              </div>
+            </div>
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
