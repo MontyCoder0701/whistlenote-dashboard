@@ -7,43 +7,8 @@ import {
   Card, CardContent, CardDescription, CardHeader, CardTitle,
 } from "~/components/ui/card";
 import { Separator } from "~/components/ui/separator";
-import { RewardStatus, type Reward } from "~/types";
-
-const MOCK_REWARDS: Reward[] = [
-  {
-    id: "rw1",
-    reportId: "1",
-    reportTitle: "낙하물 위험",
-    siteId: "site1",
-    siteName: "민이앤아이 1 현장",
-    userId: "u12900iadr",
-    amount: 100_000,
-    status: RewardStatus.completed,
-    date: new Date("2025-08-28"),
-  },
-  {
-    id: "rw2",
-    reportId: "2",
-    reportTitle: "전기 안전 위험",
-    siteId: "site2",
-    siteName: "강변 아파트 단지",
-    userId: "u21o32jsfdlk",
-    amount: 70_000,
-    status: RewardStatus.inProgress,
-    date: new Date("2025-06-27"),
-  },
-  {
-    id: "rw3",
-    reportId: "3",
-    reportTitle: "구조물 안전 위험",
-    siteId: "site3",
-    siteName: "고속도로 교량 프로젝트",
-    userId: "u31opjawjfklasjlfk",
-    amount: 120_000,
-    status: RewardStatus.pending,
-    date: new Date("2025-05-26"),
-  },
-];
+import { mockRewards } from "~/lib/mock";
+import { RewardStatus } from "~/types";
 
 const nf = new Intl.NumberFormat("ko-KR");
 const df = new Intl.DateTimeFormat("ko-KR");
@@ -64,7 +29,7 @@ export default function RewardDetailPageRoute() {
   const nav = useNavigate();
 
   const reward = useMemo(
-    () => MOCK_REWARDS.find((r) => r.id === id),
+    () => mockRewards.find((r) => r.id === id),
     [id]
   );
 

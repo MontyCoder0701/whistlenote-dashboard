@@ -14,46 +14,11 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "~/components/ui/table";
 
+import { mockRewards } from "~/lib/mock";
 import { RewardStatus, type Reward } from "~/types";
-import type { LayoutContext } from "../layouts/app-layout";
+import type { LayoutContext } from "../layouts/appbar-sidebar-layout";
 
 type StatusFilter = "all" | RewardStatus;
-
-const mockRewards: Reward[] = [
-  {
-    id: "rw1",
-    reportId: "1",
-    reportTitle: "낙하물 위험",
-    siteId: "site1",
-    siteName: "민이앤아이 1 현장",
-    userId: "u12900iadr",
-    amount: 100_000,
-    status: RewardStatus.completed,
-    date: new Date("2025-08-28"),
-  },
-  {
-    id: "rw2",
-    reportId: "2",
-    reportTitle: "전기 안전 위험",
-    siteId: "site2",
-    siteName: "강변 아파트 단지",
-    userId: "u21o32jsfdlk",
-    amount: 70_000,
-    status: RewardStatus.inProgress,
-    date: new Date("2025-06-27"),
-  },
-  {
-    id: "rw3",
-    reportId: "3",
-    reportTitle: "구조물 안전 위험",
-    siteId: "site3",
-    siteName: "고속도로 교량 프로젝트",
-    userId: "u31opjawjfklasjlfk",
-    amount: 120_000,
-    status: RewardStatus.pending,
-    date: new Date("2025-05-26"),
-  },
-];
 
 export default function RewardsPageRoute() {
   const nav = useNavigate();

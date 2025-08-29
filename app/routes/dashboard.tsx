@@ -1,7 +1,8 @@
+import { AlertTriangle, Calendar, CheckCircle, Clock, FileText, MapPin } from "lucide-react";
+import { useMemo } from "react";
 import { useNavigate, useOutletContext } from "react-router";
-
-import { Calendar, FileText, MapPin } from "lucide-react";
 import { Bar, BarChart, XAxis, YAxis } from "recharts";
+
 import {
   Card,
   CardContent,
@@ -14,14 +15,74 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "~/components/ui/chart";
-import { ReportStatus } from "~/types";
-import type { LayoutContext } from "../layouts/app-layout";
+import { mockReports } from "~/lib/mock";
+import { ReportStatus, type Report } from "~/types";
+import type { LayoutContext } from "../layouts/appbar-sidebar-layout";
 
 export default function DashboardPageRoute() {
   const nav = useNavigate();
 
-  const { filteredReports, stats, chartData, getStatusIcon, getStatusBadge } =
-    useOutletContext<LayoutContext>();
+  const { selectedSite } = useOutletContext<LayoutContext>();
+
+  const filteredReports = useMemo(
+    () =>
+      selectedSite === "all"
+        ? mockReports
+        : mockReports.filter((r) => r.siteId === selectedSite),
+    [selectedSite]
+  );
+
+  const stats = useMemo(() => {
+    const completed = filteredReports.filter(
+      (r) => r.status === ReportStatus.completed
+    ).length;
+    const inProgress = filteredReports.filter(
+      (r) => r.status === ReportStatus.inProgress
+    ).length;
+    const pending = filteredReports.filter(
+      (r) => r.status === ReportStatus.pending
+    ).length;
+    return { completed, inProgress, pending, total: filteredReports.length };
+  }, [filteredReports]);
+
+  const getStatusIcon = (status: ReportStatus) => {
+    switch (status) {
+      case ReportStatus.completed:
+        return <CheckCircle className="h-4 w-4 text-green-500" />;
+      case ReportStatus.inProgress:
+        return <Clock className="h-4 w-4 text-yellow-500" />;
+      case ReportStatus.pending:
+        return <AlertTriangle className="h-4 w-4 text-red-500" />;
+    }
+  };
+
+  const getStatusBadge = (status: ReportStatus) => {
+    const base =
+      "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium";
+    const color = {
+      [ReportStatus.completed]: "bg-green-100 text-green-800",
+      [ReportStatus.inProgress]: "bg-yellow-100 text-yellow-800",
+      [ReportStatus.pending]: "bg-red-100 text-red-800",
+    }[status];
+    return <span className={`${base} ${color}`}>{status}</span>;
+  };
+
+  function generateChartData(reports: Report[]) {
+    const monthly: Record<string, number> = {};
+    reports.forEach((r) => {
+      const m = `${r.date.getMonth() + 1}월`;
+      monthly[m] = (monthly[m] || 0) + 1;
+    });
+    return ["3월", "4월", "5월", "6월", "7월", "8월"].map((m) => ({
+      month: m,
+      incidents: monthly[m] || 0,
+    }));
+  }
+
+  const chartData = useMemo(
+    () => generateChartData(filteredReports),
+    [filteredReports]
+  );
 
   const chartConfig = {
     incidents: {

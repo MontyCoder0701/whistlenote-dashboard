@@ -1,3 +1,4 @@
+import { AlertTriangle, CheckCircle, Clock } from "lucide-react";
 import { useDeferredValue, useMemo, useState } from "react";
 import { useNavigate, useOutletContext } from "react-router";
 import { Button } from "~/components/ui/button";
@@ -11,16 +12,24 @@ import {
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "~/components/ui/table";
+import { mockReports } from "~/lib/mock";
 import { ReportStatus } from "~/types";
-import type { LayoutContext } from "../layouts/app-layout";
+import type { LayoutContext } from "../layouts/appbar-sidebar-layout";
 
 type StatusFilter = "all" | ReportStatus;
 
 export default function ReportsPageRoute() {
   const nav = useNavigate();
 
-  const { filteredReports, getStatusIcon, getStatusBadge } =
-    useOutletContext<LayoutContext>();
+  const { selectedSite } = useOutletContext<LayoutContext>();
+
+  const filteredReports = useMemo(
+    () =>
+      selectedSite === "all"
+        ? mockReports
+        : mockReports.filter((r) => r.siteId === selectedSite),
+    [selectedSite]
+  );
 
   const [q, setQ] = useState("");
   const dq = useDeferredValue(q);
@@ -69,6 +78,29 @@ export default function ReportsPageRoute() {
     setFrom("");
     setTo("");
   };
+
+  const getStatusIcon = (status: ReportStatus) => {
+    switch (status) {
+      case ReportStatus.completed:
+        return <CheckCircle className="h-4 w-4 text-green-500" />;
+      case ReportStatus.inProgress:
+        return <Clock className="h-4 w-4 text-yellow-500" />;
+      case ReportStatus.pending:
+        return <AlertTriangle className="h-4 w-4 text-red-500" />;
+    }
+  };
+
+  const getStatusBadge = (status: ReportStatus) => {
+    const base =
+      "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium";
+    const color = {
+      [ReportStatus.completed]: "bg-green-100 text-green-800",
+      [ReportStatus.inProgress]: "bg-yellow-100 text-yellow-800",
+      [ReportStatus.pending]: "bg-red-100 text-red-800",
+    }[status];
+    return <span className={`${base} ${color}`}>{status}</span>;
+  };
+
 
   return (
     <Card>

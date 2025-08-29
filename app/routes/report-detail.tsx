@@ -1,4 +1,4 @@
-import { ArrowLeft, Gift, Image as ImageIcon } from "lucide-react";
+import { AlertTriangle, ArrowLeft, CheckCircle, Clock, Gift, Image as ImageIcon } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useOutletContext, useParams } from "react-router";
 import { Button } from "~/components/ui/button";
@@ -18,8 +18,9 @@ import {
 } from "~/components/ui/dropdown-menu";
 import { Input } from "~/components/ui/input";
 import { Textarea } from "~/components/ui/textarea";
+import { mockReports } from "~/lib/mock";
 import { ReportStatus } from "~/types";
-import type { LayoutContext } from "../layouts/app-layout";
+import type { LayoutContext } from "../layouts/appbar-sidebar-layout";
 
 type Message = {
   id: string;
@@ -35,13 +36,42 @@ export default function ReportDetailPageRoute() {
   const { id } = useParams();
   const nav = useNavigate();
 
-  const { filteredReports, getStatusIcon, getStatusBadge } =
-    useOutletContext<LayoutContext>();
+  const { selectedSite } = useOutletContext<LayoutContext>();
+
+  const filteredReports = useMemo(
+    () =>
+      selectedSite === "all"
+        ? mockReports
+        : mockReports.filter((r) => r.siteId === selectedSite),
+    [selectedSite]
+  );
 
   const report = useMemo(
     () => filteredReports.find((r) => String(r.id) === String(id)),
     [filteredReports, id]
   );
+
+  const getStatusIcon = (status: ReportStatus) => {
+    switch (status) {
+      case ReportStatus.completed:
+        return <CheckCircle className="h-4 w-4 text-green-500" />;
+      case ReportStatus.inProgress:
+        return <Clock className="h-4 w-4 text-yellow-500" />;
+      case ReportStatus.pending:
+        return <AlertTriangle className="h-4 w-4 text-red-500" />;
+    }
+  };
+
+  const getStatusBadge = (status: ReportStatus) => {
+    const base =
+      "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium";
+    const color = {
+      [ReportStatus.completed]: "bg-green-100 text-green-800",
+      [ReportStatus.inProgress]: "bg-yellow-100 text-yellow-800",
+      [ReportStatus.pending]: "bg-red-100 text-red-800",
+    }[status];
+    return <span className={`${base} ${color}`}>{status}</span>;
+  };
 
   const [authorName] = useState("담당자");
   const [draft, setDraft] = useState("");
