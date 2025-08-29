@@ -12,9 +12,9 @@ import {
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "~/components/ui/table";
+import type { LayoutContext } from "~/layouts/admin/appbar-sidebar-layout";
 import { mockReports } from "~/lib/mock";
 import { ReportStatus } from "~/types";
-import type { LayoutContext } from "../layouts/appbar-sidebar-layout";
 
 type StatusFilter = "all" | ReportStatus;
 

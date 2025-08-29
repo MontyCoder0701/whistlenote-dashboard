@@ -18,9 +18,9 @@ type NavItem = {
 };
 
 const items: NavItem[] = [
-  { name: "대시보드", to: "/", icon: Home, end: true },
-  { name: "제보", to: "/reports", icon: MessageCircleWarning },
-  { name: "포상", to: "/rewards", icon: Coins },
+  { name: "대시보드", to: "/company", icon: Home, end: true },
+  { name: "제보", to: "/company/reports", icon: MessageCircleWarning },
+  { name: "포상", to: "/company/rewards", icon: Coins },
 ];
 
 export function Navigation() {
@@ -59,7 +59,7 @@ export function Navigation() {
 
         {/* User Profile + Logout */}
         <div className="p-4 border-t space-y-2">
-          <NavLink to={'/account'} className="flex items-center gap-3 px-4 py-3">
+          <NavLink to={'/company/account'} className="flex items-center gap-3 px-4 py-3">
             <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
               <User className="h-4 w-4 text-gray-600" />
             </div>
@@ -126,7 +126,7 @@ export function MobileNavTrigger() {
           </nav>
 
           <div className="border-t p-4 space-y-2">
-            <div className="flex items-center gap-3 px-4 py-3">
+            <NavLink to={"/company/account"} className="flex items-center gap-3 px-4 py-3">
               <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
                 <User className="h-4 w-4 text-gray-600" />
               </div>
@@ -134,7 +134,7 @@ export function MobileNavTrigger() {
                 <p className="text-sm font-medium text-gray-900">관리자</p>
                 <p className="text-xs text-gray-500">admin@example.com</p>
               </div>
-            </div>
+            </NavLink>
 
             {/* Logout */}
             <button
