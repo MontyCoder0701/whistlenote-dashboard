@@ -1,4 +1,4 @@
-import { AlertTriangle, ArrowLeft, CheckCircle, Clock, Gift, Image as ImageIcon } from "lucide-react";
+import { AlertTriangle, ArrowLeft, CheckCircle, Clock, Image as ImageIcon } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useOutletContext, useParams } from "react-router";
 import { Button } from "~/components/ui/button";
@@ -228,9 +228,9 @@ export default function ReportDetailPageRoute() {
 
   return (
     <>
-      <Card className="max-w-5xl mx-auto">
-        <CardHeader className="space-y-2">
-          <div className="flex items-center justify-between gap-3">
+      <Card className="mx-auto">
+        <CardHeader>
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Button variant="ghost" size="icon" onClick={() => nav(-1)} aria-label="뒤로가기">
                 <ArrowLeft className="h-5 w-5" />
@@ -239,7 +239,6 @@ export default function ReportDetailPageRoute() {
             </div>
 
             <div className="flex items-center gap-3">
-              {status && getStatusIcon(status)}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <div className="cursor-pointer select-none">
@@ -264,10 +263,8 @@ export default function ReportDetailPageRoute() {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
+
               <div className="flex items-center gap-2">
-                <Gift
-                  className={`h-4 w-4 ${rewardActive ? "text-amber-600" : "text-gray-400"}`}
-                />
                 <Input
                   type="number"
                   inputMode="numeric"
@@ -278,15 +275,15 @@ export default function ReportDetailPageRoute() {
                     const v = e.target.value;
                     setRewardAmount(v === "" ? "" : Number(v));
                   }}
-                  placeholder="포상금(포인트)"
-                  className="w-35"
+                  placeholder="포상금"
+                  className="w-25"
                 />
                 <Button
                   variant={rewardActive ? "secondary" : "default"}
                   onClick={decideReward}
                   disabled={rewardAmount === "" || Number(rewardAmount) <= 0}
                 >
-                  {rewardActive ? "금액 변경" : "지급 결정"}
+                  {rewardActive ? "변경" : "지급"}
                 </Button>
               </div>
             </div>
@@ -301,11 +298,11 @@ export default function ReportDetailPageRoute() {
           </CardDescription>
         </CardHeader>
 
-        <CardContent className="space-y-4">
+        <CardContent>
           <div className="rounded-xl border bg-white overflow-hidden">
             <div
               ref={listRef}
-              className="h-[52vh] overflow-auto px-4 py-3 space-y-3"
+              className="h-[50vh] overflow-auto px-4 py-3 space-y-3"
             >
               {messages.map((m) => {
                 if (m.author === "system") {

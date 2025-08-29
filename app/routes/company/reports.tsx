@@ -106,7 +106,7 @@ export default function ReportsPageRoute() {
     <Card>
       <CardHeader className="space-y-2">
         <CardTitle className="text-primary">제보 관리</CardTitle>
-        <CardDescription>모든 제보를 테이블로 관리합니다.</CardDescription>
+        <CardDescription>모든 제보를 테이블로 관리합니다</CardDescription>
 
         {/* Controls */}
         <div className="flex flex-col gap-3 md:flex-wrap md:flex-row md:items-center">
