@@ -3,12 +3,13 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useOutletContext, useParams } from "react-router";
 import { Button } from "~/components/ui/button";
 import {
-  Card, CardContent, CardDescription, CardHeader, CardTitle,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
 } from "~/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-} from "~/components/ui/dialog";
+import { Dialog, DialogContent } from "~/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -51,12 +52,14 @@ export default function ReportDetailPageRoute() {
   const [rewardAmount, setRewardAmount] = useState<number | "">("");
   const [decidedAmount, setDecidedAmount] = useState<number | null>(null);
 
-  // 미디어 업로드 
+  // 미디어 업로드
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // 미리보기 상태
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [previewType, setPreviewType] = useState<"image" | "video" | null>(null);
+  const [previewType, setPreviewType] = useState<"image" | "video" | null>(
+    null
+  );
 
   useEffect(() => {
     if (!report) return;
@@ -75,12 +78,32 @@ export default function ReportDetailPageRoute() {
         text: report.description || "설명이 없습니다.",
         createdAt: new Date(report.date),
       },
+      {
+        id: "rep-1",
+        author: "reporter",
+        name: "제보자",
+        mediaType: "video",
+        mediaUrl: "https://www.pexels.com/download/video/7565884/",
+        createdAt: new Date(report.date),
+      },
+      {
+        id: "rep-2",
+        author: "reporter",
+        name: "제보자",
+        mediaType: "image",
+        mediaUrl:
+          "https://images.pexels.com/photos/32743482/pexels-photo-32743482.jpeg",
+        createdAt: new Date(report.date),
+      },
     ]);
   }, [report]);
 
   const listRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
-    listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: "smooth" });
+    listRef.current?.scrollTo({
+      top: listRef.current.scrollHeight,
+      behavior: "smooth",
+    });
   }, [messages]);
 
   const send = () => {
@@ -88,7 +111,13 @@ export default function ReportDetailPageRoute() {
     if (!text || !report) return;
     setMessages((prev) => [
       ...prev,
-      { id: `mgr-${prev.length + 1}`, author: "manager", name: authorName, text, createdAt: new Date() },
+      {
+        id: `mgr-${prev.length + 1}`,
+        author: "manager",
+        name: authorName,
+        text,
+        createdAt: new Date(),
+      },
     ]);
     setDraft("");
   };
@@ -113,12 +142,20 @@ export default function ReportDetailPageRoute() {
     setStatus(newStatus);
     setMessages((prev) => [
       ...prev,
-      { id: `sys-status-${prev.length + 1}`, author: "system", text: `상태가 ${newStatus}로 변경되었습니다.`, createdAt: new Date() },
+      {
+        id: `sys-status-${prev.length + 1}`,
+        author: "system",
+        text: `상태가 ${newStatus}로 변경되었습니다.`,
+        createdAt: new Date(),
+      },
     ]);
   };
 
   const decideReward = () => {
-    const amt = typeof rewardAmount === "number" ? rewardAmount : parseInt(String(rewardAmount || 0), 10);
+    const amt =
+      typeof rewardAmount === "number"
+        ? rewardAmount
+        : parseInt(String(rewardAmount || 0), 10);
     if (!amt || amt <= 0 || Number.isNaN(amt)) return;
     const firstTime = decidedAmount === null;
     const prevAmt = decidedAmount;
@@ -129,8 +166,8 @@ export default function ReportDetailPageRoute() {
         id: `sys-reward-${prev.length + 1}`,
         author: "system",
         text: firstTime
-          ? `포상금 ${amt} 지급이 결정되었습니다.`
-          : `포상금이 ${prevAmt} → ${amt}로 변경되었습니다.`,
+          ? `포상금 ${amt} 포인트 지급이 결정되었습니다.`
+          : `포상금이 ${prevAmt} → ${amt} 포인트로 변경되었습니다.`,
         createdAt: new Date(),
       },
     ]);
@@ -174,13 +211,27 @@ export default function ReportDetailPageRoute() {
                   </div>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-36">
-                  <DropdownMenuItem onSelect={() => changeStatus(ReportStatus.pending)}>대기</DropdownMenuItem>
-                  <DropdownMenuItem onSelect={() => changeStatus(ReportStatus.inProgress)}>진행중</DropdownMenuItem>
-                  <DropdownMenuItem onSelect={() => changeStatus(ReportStatus.completed)}>완료</DropdownMenuItem>
+                  <DropdownMenuItem
+                    onSelect={() => changeStatus(ReportStatus.pending)}
+                  >
+                    대기
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onSelect={() => changeStatus(ReportStatus.inProgress)}
+                  >
+                    진행중
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onSelect={() => changeStatus(ReportStatus.completed)}
+                  >
+                    완료
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
               <div className="flex items-center gap-2">
-                <Gift className={`h-4 w-4 ${rewardActive ? "text-amber-600" : "text-gray-400"}`} />
+                <Gift
+                  className={`h-4 w-4 ${rewardActive ? "text-amber-600" : "text-gray-400"}`}
+                />
                 <Input
                   type="number"
                   inputMode="numeric"
@@ -191,8 +242,8 @@ export default function ReportDetailPageRoute() {
                     const v = e.target.value;
                     setRewardAmount(v === "" ? "" : Number(v));
                   }}
-                  placeholder="포상금(원)"
-                  className="w-28"
+                  placeholder="포상금(포인트)"
+                  className="w-35"
                 />
                 <Button
                   variant={rewardActive ? "secondary" : "default"}
@@ -206,33 +257,54 @@ export default function ReportDetailPageRoute() {
           </div>
           <CardDescription>
             {report.siteName} · {new Date(report.date).toLocaleDateString()}
-            {rewardActive && <span className="ml-2 text-amber-700">(포상금 {decidedAmount!})</span>}
+            {rewardActive && (
+              <span className="ml-2 text-amber-700">
+                (포상금 {decidedAmount!} 포인트)
+              </span>
+            )}
           </CardDescription>
         </CardHeader>
 
         <CardContent className="space-y-4">
           <div className="rounded-xl border bg-white overflow-hidden">
-            <div ref={listRef} className="h-[52vh] overflow-auto px-4 py-3 space-y-3">
+            <div
+              ref={listRef}
+              className="h-[52vh] overflow-auto px-4 py-3 space-y-3"
+            >
               {messages.map((m) => {
                 if (m.author === "system") {
-                  return <div key={m.id} className={sysBubble}>{m.text} · {m.createdAt.toLocaleString()}</div>;
+                  return (
+                    <div key={m.id} className={sysBubble}>
+                      {m.text} · {m.createdAt.toLocaleString()}
+                    </div>
+                  );
                 }
                 const mine = m.author === "manager";
                 return (
-                  <div key={m.id} className={`flex items-end gap-2 ${mine ? "justify-end" : "justify-start"}`}>
+                  <div
+                    key={m.id}
+                    className={`flex items-end gap-2 ${mine ? "justify-end" : "justify-start"}`}
+                  >
                     {!mine && (
                       <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center text-xs text-gray-600">
                         {(m.name || "유저").slice(0, 2)}
                       </div>
                     )}
                     <div className={`min-w-0 ${mine ? "ml-auto" : ""}`}>
-                      <div className={`flex ${mine ? "justify-end" : "justify-start"} mb-1`}>
+                      <div
+                        className={`flex ${mine ? "justify-end" : "justify-start"} mb-1`}
+                      >
                         <span className="text-[10px] text-gray-500">
-                          {(m.name || (mine ? authorName : "제보자"))} · {m.createdAt.toLocaleTimeString()}
+                          {m.name || (mine ? authorName : "제보자")} ·{" "}
+                          {m.createdAt.toLocaleTimeString()}
                         </span>
                       </div>
                       <div className={mine ? meBubble : otherBubble}>
-                        {m.text && <p className="whitespace-pre-wrap break-words text-sm leading-relaxed">{m.text}</p>}
+                        {m.text && (
+                          <p className="whitespace-pre-wrap break-words text-sm leading-relaxed">
+                            {m.text}
+                          </p>
+                        )}
                         {m.mediaUrl && m.mediaType === "image" && (
                           <img
                             src={m.mediaUrl}
@@ -281,10 +353,16 @@ export default function ReportDetailPageRoute() {
                     }
                   }}
                 />
-                <Button type="button" variant="secondary" onClick={() => fileInputRef.current?.click()}>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => fileInputRef.current?.click()}
+                >
                   <ImageIcon className="h-4 w-4" />
                 </Button>
-                <Button onClick={send} disabled={!draft.trim()}>보내기</Button>
+                <Button onClick={send} disabled={!draft.trim()}>
+                  보내기
+                </Button>
               </div>
             </div>
           </div>
@@ -298,14 +376,33 @@ export default function ReportDetailPageRoute() {
       </Card>
 
       {/* 미리보기 다이얼로그 */}
-      <Dialog open={!!previewUrl} onOpenChange={(o) => !o && setPreviewUrl(null)}>
-        <DialogContent className="max-w-4x">
-          {previewUrl && previewType === "image" && (
-            <img src={previewUrl} alt="미리보기" className="w-full h-auto rounded-lg" />
-          )}
-          {previewUrl && previewType === "video" && (
-            <video src={previewUrl} controls autoPlay className="w-full h-auto rounded-lg" />
-          )}
+      <Dialog
+        open={!!previewUrl}
+        onOpenChange={(o) => !o && setPreviewUrl(null)}
+      >
+        {/* Width capped to viewport (95vw) and 64rem, no padding */}
+        <DialogContent className="p-0 max-w-[min(95vw,64rem)]">
+          {/* Cap height to viewport and let media scale within */}
+          <div className="w-full max-h-[85vh]">
+            {previewUrl && previewType === "image" && (
+              <img
+                src={previewUrl}
+                alt="미리보기"
+                className="block w-full h-full object-contain rounded-lg"
+              />
+            )}
+
+            {previewUrl && previewType === "video" && (
+              <video
+                src={previewUrl}
+                controls
+                autoPlay
+                playsInline
+                preload="metadata"
+                className="block w-full h-full object-contain rounded-lg"
+              />
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     </>
