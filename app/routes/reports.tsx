@@ -17,7 +17,7 @@ import type { LayoutContext } from "../layouts/app-layout";
 type StatusFilter = "all" | ReportStatus;
 
 export default function ReportsPageRoute() {
-  const navigate = useNavigate();
+  const nav = useNavigate();
 
   const { filteredReports, getStatusIcon, getStatusBadge } =
     useOutletContext<LayoutContext>();
@@ -139,7 +139,7 @@ export default function ReportsPageRoute() {
             {/* Mobile: stacked cards */}
             <div className="md:hidden space-y-3">
               {results.map((r) => (
-                <div key={r.id} onClick={() => navigate(`/reports/${r.id}`)} className="rounded-xl border p-4 bg-white hover:bg-gray-50">
+                <div key={r.id} onClick={() => nav(`/reports/${r.id}`)} className="rounded-xl border p-4 bg-white hover:bg-gray-50">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <div className="font-medium text-gray-900 break-words">
@@ -195,7 +195,7 @@ export default function ReportsPageRoute() {
                 </TableHeader>
                 <TableBody>
                   {results.map((r) => (
-                    <TableRow key={r.id} onClick={() => navigate(`/reports/${r.id}`)} className="align-top">
+                    <TableRow key={r.id} onClick={() => nav(`/reports/${r.id}`)} className="align-top">
                       <TableCell>
                         <div className="font-medium text-gray-900">{r.siteName}</div>
                       </TableCell>

@@ -1,4 +1,4 @@
-import { useOutletContext } from "react-router";
+import { useNavigate, useOutletContext } from "react-router";
 
 import { Calendar, FileText, MapPin } from "lucide-react";
 import { Bar, BarChart, XAxis, YAxis } from "recharts";
@@ -18,6 +18,8 @@ import { ReportStatus } from "~/types";
 import type { LayoutContext } from "../layouts/app-layout";
 
 export default function DashboardPageRoute() {
+  const nav = useNavigate();
+
   const { filteredReports, stats, chartData, getStatusIcon, getStatusBadge } =
     useOutletContext<LayoutContext>();
 
@@ -113,6 +115,7 @@ export default function DashboardPageRoute() {
             {filteredReports.map((report) => (
               <div
                 key={report.id}
+                onClick={() => nav(`/reports/${report.id}`)}
                 className="border border-gray-200 rounded-lg p-4 hover:shadow-md hover:border-primary/50 transition-all"
               >
                 <div className="flex items-start justify-between">
