@@ -33,7 +33,7 @@ type Message = {
 
 export default function ReportDetailPageRoute() {
   const { id } = useParams();
-  const navigate = useNavigate();
+  const nav = useNavigate();
 
   const { filteredReports, getStatusIcon, getStatusBadge } =
     useOutletContext<LayoutContext>();
@@ -181,7 +181,7 @@ export default function ReportDetailPageRoute() {
           <CardDescription>제보를 찾을 수 없습니다.</CardDescription>
         </CardHeader>
         <CardContent>
-          <Button variant="secondary" onClick={() => navigate(-1)}>
+          <Button variant="secondary" onClick={() => nav(-1)}>
             <ArrowLeft className="h-4 w-4 mr-2" /> 돌아가기
           </Button>
         </CardContent>
@@ -201,7 +201,13 @@ export default function ReportDetailPageRoute() {
       <Card className="max-w-5xl mx-auto">
         <CardHeader className="space-y-2">
           <div className="flex items-center justify-between gap-3">
-            <CardTitle className="text-primary">제보 상세</CardTitle>
+            <div className="flex items-center gap-2">
+              <Button variant="ghost" size="icon" onClick={() => nav(-1)} aria-label="뒤로가기">
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+              <CardTitle className="text-primary">제보 상세</CardTitle>
+            </div>
+
             <div className="flex items-center gap-3">
               {status && getStatusIcon(status)}
               <DropdownMenu>
@@ -365,12 +371,6 @@ export default function ReportDetailPageRoute() {
                 </Button>
               </div>
             </div>
-          </div>
-
-          <div className="pt-2">
-            <Button variant="secondary" onClick={() => navigate(-1)}>
-              <ArrowLeft className="h-4 w-4 mr-2" /> 목록으로
-            </Button>
           </div>
         </CardContent>
       </Card>

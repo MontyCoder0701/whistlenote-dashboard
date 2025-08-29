@@ -13,5 +13,6 @@ export default [
     route("reports/:id", "routes/report-detail.tsx"),
 
     route("rewards", "routes/rewards.tsx"),
+    route("rewards/:id", "routes/reward-detail.tsx"),
   ]),
 ] satisfies RouteConfig;
