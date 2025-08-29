@@ -3,6 +3,7 @@ import { NavLink } from "react-router";
 import { Button } from "~/components/ui/button";
 import {
   Sheet,
+  SheetClose,
   SheetContent,
   SheetDescription,
   SheetHeader,
@@ -26,7 +27,7 @@ const items: NavItem[] = [
 export function Navigation() {
   // Desktop / tablet sidebar only
   return (
-    <aside className="hidden md:flex w-64 bg-white shadow-lg flex-shrink-0">
+    <aside className="hidden md:flex bg-white shadow-lg flex-shrink-0">
       <div className="flex flex-col h-screen">
         {/* Logo/Brand */}
         <NavLink to={"/"} className="p-6 border-b">
@@ -107,19 +108,21 @@ export function MobileNavTrigger() {
             <ul className="space-y-1">
               {items.map((item) => (
                 <li key={item.to}>
-                  <NavLink
-                    to={item.to}
-                    end={item.end}
-                    className={({ isActive }) =>
-                      `flex items-center gap-3 px-4 py-3 rounded-lg text-base ${isActive
-                        ? "bg-primary text-white"
-                        : "text-gray-800 hover:bg-gray-100"
-                      }`
-                    }
-                  >
-                    <item.icon className="h-5 w-5" />
-                    <span>{item.name}</span>
-                  </NavLink>
+                  <SheetClose className="flex items-center gap-3 px-4 py-3" asChild>
+                    <NavLink
+                      to={item.to}
+                      end={item.end}
+                      className={({ isActive }) =>
+                        `rounded-lg text-base ${isActive
+                          ? "bg-primary text-white"
+                          : "text-gray-800 hover:bg-gray-100"
+                        }`
+                      }
+                    >
+                      <item.icon className="h-5 w-5" />
+                      <span>{item.name}</span>
+                    </NavLink>
+                  </SheetClose>
                 </li>
               ))}
             </ul>

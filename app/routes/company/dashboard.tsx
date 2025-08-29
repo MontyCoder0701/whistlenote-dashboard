@@ -1,7 +1,7 @@
 import { AlertTriangle, Calendar, CheckCircle, Clock, FileText, MapPin } from "lucide-react";
 import { useMemo } from "react";
 import { useNavigate, useOutletContext } from "react-router";
-import { Bar, BarChart, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
 
 import {
   Card,
@@ -96,32 +96,21 @@ export default function DashboardPageRoute() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
         <div className="lg:col-span-2">
           <Card>
-            <CardHeader>
-              <CardTitle className="text-primary">
-                월별 사고 발생 현황
-              </CardTitle>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-primary">월별 사고 발생 현황</CardTitle>
               <CardDescription>최근 6개월간 사고 발생 건수</CardDescription>
             </CardHeader>
-            <CardContent>
-              <ChartContainer config={chartConfig}>
-                <BarChart data={chartData}>
-                  <XAxis
-                    dataKey="month"
-                    tickLine={false}
-                    tickMargin={10}
-                    axisLine={false}
-                  />
-                  <YAxis tickLine={false} axisLine={false} tickMargin={6} />
-                  <ChartTooltip
-                    cursor={false}
-                    content={<ChartTooltipContent hideLabel />}
-                  />
-                  <Bar
-                    dataKey="incidents"
-                    fill="var(--color-incidents)"
-                    radius={4}
-                  />
-                </BarChart>
+
+            <CardContent className="max-w-lg">
+              <ChartContainer config={chartConfig} className="h-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={chartData}>
+                    <XAxis dataKey="month" tickLine={false} tickMargin={10} axisLine={false} />
+                    <YAxis tickLine={false} axisLine={false} tickMargin={6} />
+                    <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
+                    <Bar dataKey="incidents" fill="var(--color-incidents)" radius={4} />
+                  </BarChart>
+                </ResponsiveContainer>
               </ChartContainer>
             </CardContent>
           </Card>
@@ -133,6 +122,7 @@ export default function DashboardPageRoute() {
               <CardTitle className="text-primary">이번 달 통계</CardTitle>
               <CardDescription>8월 현재 현황</CardDescription>
             </CardHeader>
+
             <CardContent className="space-y-4">
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">총 제보</span>
@@ -200,6 +190,7 @@ export default function DashboardPageRoute() {
                           </span>
                         </div>
                       </div>
+
                       <p className="text-gray-600 mt-2">{report.description}</p>
                       <div className="flex items-center space-x-2 mt-3">
                         <span className="text-sm font-medium text-gray-900">
