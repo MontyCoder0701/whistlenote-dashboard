@@ -107,9 +107,11 @@ export default function ReportsPageRoute() {
       <CardHeader className="space-y-2">
         <CardTitle className="text-primary">제보 관리</CardTitle>
         <CardDescription>모든 제보를 테이블로 관리합니다</CardDescription>
+      </CardHeader>
 
+      <CardContent>
         {/* Controls */}
-        <div className="flex flex-col gap-3 md:flex-wrap md:flex-row md:items-center">
+        <div className="flex flex-col gap-3 md:flex-wrap md:flex-row md:items-center pb-4">
           {/* Search */}
           <div className="flex items-center gap-2 md:flex-1 min-w-[12rem]">
             <Input
@@ -142,14 +144,14 @@ export default function ReportsPageRoute() {
               type="date"
               value={from}
               onChange={(e) => setFrom(e.target.value)}
-              className="flex-1 md:w-[9.5rem]"
+              className="flex-1 md:w-[9.5rem] text-xs"
             />
             <span className="text-gray-400">~</span>
             <Input
               type="date"
               value={to}
               onChange={(e) => setTo(e.target.value)}
-              className="flex-1 md:w-[9.5rem]"
+              className="flex-1 md:w-[9.5rem] text-xs"
             />
           </div>
 
@@ -159,9 +161,7 @@ export default function ReportsPageRoute() {
             </Button>
           </div>
         </div>
-      </CardHeader>
 
-      <CardContent>
         {results.length === 0 ? (
           <div className="rounded-lg border bg-white p-8 text-center text-sm text-gray-600">
             조건에 맞는 제보가 없습니다.

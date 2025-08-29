@@ -99,9 +99,11 @@ export default function RewardsPageRoute() {
       <CardHeader className="space-y-2">
         <CardTitle className="text-primary">포상 관리</CardTitle>
         <CardDescription>제보자 포상 시스템을 관리합니다</CardDescription>
+      </CardHeader>
 
+      <CardContent>
         {/* Controls */}
-        <div className="flex flex-col gap-3 md:flex-wrap md:flex-row md:items-center">
+        <div className="flex flex-col gap-3 md:flex-wrap md:flex-row md:items-center pb-4">
           {/* Search */}
           <div className="flex items-center gap-2 md:flex-1 min-w-[12rem]">
             <Input
@@ -134,14 +136,14 @@ export default function RewardsPageRoute() {
               type="date"
               value={from}
               onChange={(e) => setFrom(e.target.value)}
-              className="flex-1 md:w-[9.5rem]"
+              className="flex-1 md:w-[9.5rem] text-xs"
             />
             <span className="text-gray-400">~</span>
             <Input
               type="date"
               value={to}
               onChange={(e) => setTo(e.target.value)}
-              className="flex-1 md:w-[9.5rem]"
+              className="flex-1 md:w-[9.5rem] text-xs"
             />
           </div>
 
@@ -151,9 +153,7 @@ export default function RewardsPageRoute() {
             </Button>
           </div>
         </div>
-      </CardHeader>
 
-      <CardContent>
         {results.length === 0 ? (
           <div className="rounded-lg border bg-white p-12 text-center">
             <Coins className="h-12 w-12 text-gray-300 mx-auto mb-3" />

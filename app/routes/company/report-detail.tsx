@@ -1,6 +1,7 @@
 import { AlertTriangle, ArrowLeft, CheckCircle, Clock, Image as ImageIcon } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useOutletContext, useParams } from "react-router";
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -63,14 +64,12 @@ export default function ReportDetailPageRoute() {
   };
 
   const getStatusBadge = (status: ReportStatus) => {
-    const base =
-      "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium";
     const color = {
       [ReportStatus.completed]: "bg-green-100 text-green-800",
       [ReportStatus.inProgress]: "bg-yellow-100 text-yellow-800",
       [ReportStatus.pending]: "bg-red-100 text-red-800",
     }[status];
-    return <span className={`${base} ${color}`}>{status}</span>;
+    return <Badge className={`${color} px-2 py-0.5 text-xs`}>{status}</Badge>;
   };
 
   const [authorName] = useState("담당자");
@@ -87,9 +86,7 @@ export default function ReportDetailPageRoute() {
 
   // 미리보기 상태
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [previewType, setPreviewType] = useState<"image" | "video" | null>(
-    null
-  );
+  const [previewType, setPreviewType] = useState<"image" | "video" | null>(null);
 
   useEffect(() => {
     if (!report) return;
@@ -205,12 +202,12 @@ export default function ReportDetailPageRoute() {
 
   if (!report) {
     return (
-      <Card>
-        <CardHeader>
+      <Card className="mx-auto max-w-screen-sm sm:max-w-none">
+        <CardHeader className="px-3 sm:px-6">
           <CardTitle className="text-primary">제보 상세</CardTitle>
           <CardDescription>제보를 찾을 수 없습니다.</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-3 sm:px-6 pb-[calc(env(safe-area-inset-bottom)+1rem)]">
           <Button variant="secondary" onClick={() => nav(-1)}>
             <ArrowLeft className="h-4 w-4 mr-2" /> 돌아가기
           </Button>
@@ -219,7 +216,7 @@ export default function ReportDetailPageRoute() {
     );
   }
 
-  const bubbleBase = "max-w-[80%] rounded-2xl px-3 py-2 shadow-sm";
+  const bubbleBase = "max-w-[82%] sm:max-w-[70%] rounded-2xl px-3 py-2 shadow-sm";
   const meBubble = `${bubbleBase} bg-primary text-white ml-auto`;
   const otherBubble = `${bubbleBase} bg-gray-100 text-gray-900`;
   const sysBubble = "text-xs text-gray-500 text-center my-2";
@@ -228,67 +225,18 @@ export default function ReportDetailPageRoute() {
 
   return (
     <>
-      <Card className="mx-auto">
-        <CardHeader>
+      <Card className="mx-auto max-w-screen-sm sm:max-w-none">
+        <CardHeader className="px-3 sm:px-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Button variant="ghost" size="icon" onClick={() => nav(-1)} aria-label="뒤로가기">
+              <Button variant="ghost" size="icon" onClick={() => nav(-1)} aria-label="뒤로가기" className="h-9 w-9">
                 <ArrowLeft className="h-5 w-5" />
               </Button>
               <CardTitle className="text-primary">제보 상세</CardTitle>
             </div>
-
-            <div className="flex items-center gap-3">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <div className="cursor-pointer select-none">
-                    {status && getStatusBadge(status)}
-                  </div>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-36">
-                  <DropdownMenuItem
-                    onSelect={() => changeStatus(ReportStatus.pending)}
-                  >
-                    대기
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onSelect={() => changeStatus(ReportStatus.inProgress)}
-                  >
-                    진행중
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onSelect={() => changeStatus(ReportStatus.completed)}
-                  >
-                    완료
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-
-              <div className="flex items-center gap-2">
-                <Input
-                  type="number"
-                  inputMode="numeric"
-                  min={0}
-                  step={1000}
-                  value={rewardAmount}
-                  onChange={(e) => {
-                    const v = e.target.value;
-                    setRewardAmount(v === "" ? "" : Number(v));
-                  }}
-                  placeholder="포상금"
-                  className="w-25"
-                />
-                <Button
-                  variant={rewardActive ? "secondary" : "default"}
-                  onClick={decideReward}
-                  disabled={rewardAmount === "" || Number(rewardAmount) <= 0}
-                >
-                  {rewardActive ? "변경" : "지급"}
-                </Button>
-              </div>
-            </div>
           </div>
-          <CardDescription>
+
+          <CardDescription className="mt-1">
             {report.siteName} · {new Date(report.date).toLocaleDateString()}
             {rewardActive && (
               <span className="ml-2 text-amber-700">
@@ -298,11 +246,62 @@ export default function ReportDetailPageRoute() {
           </CardDescription>
         </CardHeader>
 
-        <CardContent>
-          <div className="rounded-xl border bg-white overflow-hidden">
+        <CardContent className="px-0 sm:px-6">
+          {/* Controls */}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 px-3 sm:px-0 pb-3">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <div className="cursor-pointer select-none">
+                  {status && getStatusBadge(status)}
+                </div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-36">
+                <DropdownMenuItem onSelect={() => changeStatus(ReportStatus.pending)}>
+                  대기
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => changeStatus(ReportStatus.inProgress)}>
+                  진행중
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => changeStatus(ReportStatus.completed)}>
+                  완료
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <div className="flex items-center gap-2">
+              <Input
+                type="number"
+                inputMode="numeric"
+                min={0}
+                step={1000}
+                value={rewardAmount}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setRewardAmount(v === "" ? "" : Number(v));
+                }}
+                placeholder="포상금"
+                className="w-24"
+              />
+              <Button
+                variant={rewardActive ? "secondary" : "default"}
+                onClick={decideReward}
+                disabled={rewardAmount === "" || Number(rewardAmount) <= 0}
+                className="min-w-16"
+              >
+                {rewardActive ? "변경" : "지급"}
+              </Button>
+            </div>
+          </div>
+
+          {/* Chat container */}
+          <div className="rounded-none sm:rounded-xl border border-t-0 sm:border-t bg-white overflow-hidden">
             <div
               ref={listRef}
-              className="h-[50vh] overflow-auto px-4 py-3 space-y-3"
+              className="
+                h-[55svh] sm:h-[50vh]
+                overflow-auto overscroll-y-contain
+                px-3 sm:px-4 py-3 space-y-3
+              "
             >
               {messages.map((m) => {
                 if (m.author === "system") {
@@ -319,14 +318,12 @@ export default function ReportDetailPageRoute() {
                     className={`flex items-end gap-2 ${mine ? "justify-end" : "justify-start"}`}
                   >
                     {!mine && (
-                      <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center text-xs text-gray-600">
+                      <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center text-xs text-gray-600 shrink-0">
                         {(m.name || "유저").slice(0, 2)}
                       </div>
                     )}
                     <div className={`min-w-0 ${mine ? "ml-auto" : ""}`}>
-                      <div
-                        className={`flex ${mine ? "justify-end" : "justify-start"} mb-1`}
-                      >
+                      <div className={`flex ${mine ? "justify-end" : "justify-start"} mb-1`}>
                         <span className="text-[10px] text-gray-500">
                           {m.name || (mine ? authorName : "제보자")} ·{" "}
                           {m.createdAt.toLocaleTimeString()}
@@ -338,26 +335,31 @@ export default function ReportDetailPageRoute() {
                             {m.text}
                           </p>
                         )}
+
                         {m.mediaUrl && m.mediaType === "image" && (
                           <img
                             src={m.mediaUrl}
                             alt="첨부 이미지"
-                            className="mt-2 max-h-60 rounded-lg cursor-pointer"
+                            className="mt-2 w-full h-auto max-h-[42svh] sm:max-h-60 rounded-lg cursor-pointer object-contain"
                             onClick={() => {
                               setPreviewUrl(m.mediaUrl!);
                               setPreviewType("image");
                             }}
+                            loading="lazy"
                           />
                         )}
+
                         {m.mediaUrl && m.mediaType === "video" && (
                           <video
                             src={m.mediaUrl}
                             controls
-                            className="mt-2 max-h-60 rounded-lg cursor-pointer"
+                            playsInline
+                            className="mt-2 w-full h-auto max-h-[42svh] sm:max-h-60 rounded-lg cursor-pointer object-contain"
                             onClick={() => {
                               setPreviewUrl(m.mediaUrl!);
                               setPreviewType("video");
                             }}
+                            preload="metadata"
                           />
                         )}
                       </div>
@@ -367,13 +369,20 @@ export default function ReportDetailPageRoute() {
               })}
             </div>
 
-            <div className="border-t p-3 space-y-2">
+            {/* Composer */}
+            <div
+              className="
+                border-t p-3 space-y-2
+                pb-[calc(env(safe-area-inset-bottom)+0.75rem)]
+                bg-white
+              "
+            >
               <div className="flex items-end gap-2">
                 <Textarea
                   value={draft}
                   onChange={(e) => setDraft(e.target.value)}
                   placeholder="메시지를 입력하세요…"
-                  className="min-h-[72px] flex-1"
+                  className="min-h-[64px] sm:min-h-[72px] flex-1"
                 />
                 <input
                   type="file"
@@ -383,6 +392,7 @@ export default function ReportDetailPageRoute() {
                   onChange={(e) => {
                     if (e.target.files && e.target.files[0]) {
                       sendMedia(e.target.files[0]);
+                      e.currentTarget.value = "";
                     }
                   }}
                 />
@@ -390,10 +400,11 @@ export default function ReportDetailPageRoute() {
                   type="button"
                   variant="secondary"
                   onClick={() => fileInputRef.current?.click()}
+                  className="h-10 w-10 p-0"
                 >
                   <ImageIcon className="h-4 w-4" />
                 </Button>
-                <Button onClick={send} disabled={!draft.trim()}>
+                <Button onClick={send} disabled={!draft.trim()} className="h-10">
                   보내기
                 </Button>
               </div>
@@ -415,7 +426,7 @@ export default function ReportDetailPageRoute() {
               <img
                 src={previewUrl}
                 alt="미리보기"
-                className="block w-full h-full object-contain rounded-lg"
+                className="block w-full h-full object-contain"
               />
             )}
 
@@ -426,7 +437,7 @@ export default function ReportDetailPageRoute() {
                 autoPlay
                 playsInline
                 preload="metadata"
-                className="block w-full h-full object-contain rounded-lg"
+                className="block w-full h-full object-contain"
               />
             )}
           </div>

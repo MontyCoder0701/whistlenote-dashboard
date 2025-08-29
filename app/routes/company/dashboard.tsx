@@ -1,7 +1,8 @@
 import { AlertTriangle, Calendar, CheckCircle, Clock, FileText, MapPin } from "lucide-react";
 import { useMemo } from "react";
 import { useNavigate, useOutletContext } from "react-router";
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, XAxis, YAxis } from "recharts";
+import { Badge } from "~/components/ui/badge";
 
 import {
   Card,
@@ -57,14 +58,12 @@ export default function DashboardPageRoute() {
   };
 
   const getStatusBadge = (status: ReportStatus) => {
-    const base =
-      "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium";
     const color = {
       [ReportStatus.completed]: "bg-green-100 text-green-800",
       [ReportStatus.inProgress]: "bg-yellow-100 text-yellow-800",
       [ReportStatus.pending]: "bg-red-100 text-red-800",
     }[status];
-    return <span className={`${base} ${color}`}>{status}</span>;
+    return <Badge className={color}>{status}</Badge>;
   };
 
   function generateChartData(reports: Report[]) {
@@ -101,16 +100,14 @@ export default function DashboardPageRoute() {
               <CardDescription>최근 6개월간 사고 발생 건수</CardDescription>
             </CardHeader>
 
-            <CardContent className="max-w-lg">
-              <ChartContainer config={chartConfig} className="h-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={chartData}>
-                    <XAxis dataKey="month" tickLine={false} tickMargin={10} axisLine={false} />
-                    <YAxis tickLine={false} axisLine={false} tickMargin={6} />
-                    <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
-                    <Bar dataKey="incidents" fill="var(--color-incidents)" radius={4} />
-                  </BarChart>
-                </ResponsiveContainer>
+            <CardContent>
+              <ChartContainer config={chartConfig} className="mx-auto max-w-lg w-full">
+                <BarChart data={chartData}>
+                  <XAxis dataKey="month" tickLine={false} tickMargin={10} axisLine={false} />
+                  <YAxis tickLine={false} axisLine={false} tickMargin={6} />
+                  <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
+                  <Bar dataKey="incidents" fill="var(--color-incidents)" radius={4} />
+                </BarChart>
               </ChartContainer>
             </CardContent>
           </Card>

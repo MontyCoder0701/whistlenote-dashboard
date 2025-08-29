@@ -1,6 +1,7 @@
 import { ArrowLeft, CalendarDays, Coins } from "lucide-react";
 import { useMemo } from "react";
 import { Link, useNavigate, useParams } from "react-router";
+import { Badge } from "~/components/ui/badge";
 
 import { Button } from "~/components/ui/button";
 import {
@@ -13,17 +14,6 @@ import { RewardStatus } from "~/types";
 const nf = new Intl.NumberFormat("ko-KR");
 const df = new Intl.DateTimeFormat("ko-KR");
 
-function StatusBadge({ status }: { status: RewardStatus }) {
-  const base = "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium";
-  const color =
-    status === RewardStatus.completed
-      ? "bg-green-100 text-green-800"
-      : status === RewardStatus.inProgress
-        ? "bg-yellow-100 text-yellow-800"
-        : "bg-red-100 text-red-800";
-  return <span className={`${base} ${color}`}>{status}</span>;
-}
-
 export default function RewardDetailPageRoute() {
   const { id } = useParams();
   const nav = useNavigate();
@@ -32,6 +22,15 @@ export default function RewardDetailPageRoute() {
     () => mockRewards.find((r) => r.id === id),
     [id]
   );
+
+  const getStatusBadge = (status: RewardStatus) => {
+    const color = {
+      [RewardStatus.completed]: "bg-green-100 text-green-800",
+      [RewardStatus.inProgress]: "bg-yellow-100 text-yellow-800",
+      [RewardStatus.pending]: "bg-red-100 text-red-800",
+    }[status];
+    return <Badge className={color}>{status}</Badge>;
+  };
 
   if (!reward) {
     return (
@@ -72,17 +71,17 @@ export default function RewardDetailPageRoute() {
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="rounded-xl border bg-white p-5 space-y-4 md:col-span-2">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center flex-wrap justify-between gap-3">
               <div className="mt-2">
                 <div className="text-lg font-semibold text-gray-900">{reward.reportTitle}</div>
                 <div className="text-sm text-gray-600 mt-1 flex items-center gap-2">
-                  <StatusBadge status={reward.status} />
+                  {reward.status && getStatusBadge(reward.status)}
                   <span>{df.format(new Date(reward.date))}</span>
                 </div>
               </div>
 
               <Link to={`/company/reports/${reward.reportId}`}>
-                <Button size="sm">제보 상세 확인하기</Button>
+                <Button size="sm">제보 확인하기</Button>
               </Link>
             </div>
 
@@ -103,7 +102,7 @@ export default function RewardDetailPageRoute() {
 
               <div className="text-sm">
                 <div className="text-gray-500">상태</div>
-                <StatusBadge status={reward.status} />
+                {reward.status && getStatusBadge(reward.status)}
               </div>
 
               <div className="text-sm">
